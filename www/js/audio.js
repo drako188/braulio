@@ -62,7 +62,7 @@ function noise(dur, vol = 0.3, freq = 1500, delay = 0, pan = 0, type = 'lowpass'
   g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
   s.connect(f); f.connect(g); g.connect(outNode(pan)); s.start(t, Math.random()); s.stop(t + dur + 0.02);
 }
-const sfxLast = {};
+const sfxLast = {}, XPC = { n: 0, t: 0 };
 function throttle(k, ms) { const n = performance.now(); if (n - (sfxLast[k] || 0) < ms) return false; sfxLast[k] = n; return true; }
 
 const SFX = {
@@ -101,6 +101,9 @@ const SFX = {
   roar() { tone(110, 1.1, 'sawtooth', 0.22, 38); tone(165, 0.9, 'square', 0.08, 55); noise(1.1, 0.35, 900, 0, 0, 'bandpass', 300, 3); },
   bossDie() { noise(3, 0.45, 2000, 0, 0, 'lowpass', 30); tone(60, 3, 'sine', 0.4, 20); },
   start() { [392, 523, 659, 784, 1046].forEach((f, i) => tone(f, 0.16, 'square', 0.05, 0, i * 0.07)); },
+  levelUp() { [523, 784, 1046, 1568].forEach((f, i) => { tone(f, 0.18, 'square', 0.05, 0, i * 0.06); tone(f / 2, 0.2, 'triangle', 0.06, 0, i * 0.06); }); tone(200, 0.5, 'sawtooth', 0.04, 1600, 0, 0, 0.2); },
+  xp() { if (throttle('xp', 45)) { XPC.n = performance.now() - XPC.t < 400 ? Math.min(XPC.n + 1, 14) : 0; XPC.t = performance.now(); tone(1046 * Math.pow(2, XPC.n / 12), 0.07, 'sine', 0.05, 0, 0); } },
+  barrier() { tone(900, 0.25, 'sine', 0.1, 300); noise(0.2, 0.08, 6000, 0, 0, 'bandpass', 2000, 3); },
   ui() { tone(1200, 0.05, 'triangle', 0.06, 1800); }
 };
 

@@ -2,7 +2,7 @@
 /* ---------------- Naves y dificultad ---------------- */
 const SHIPS = [
   { id: 'falcon', name: 'HALCÓN', role: 'Equilibrado', col: '#00e5ff', speed: 1, armor: 3, maxArmor: 5, rate: 0.1, dmg: 1, hit: 9, bombs: 2, weapon: 'plasma', flame: 'flame',
-    flames: [[-22, 38, 18, 40], [0, 42, 14, 30]], skill: 'Empieza con arma nivel 2',
+    flames: [[-22, 38, 18, 40], [0, 42, 14, 30]], skill: 'Empieza en nivel 3',
     desc: 'Plasma en abanico. Rinde bien en todo, sin puntos débiles.' },
   { id: 'rayo', name: 'RAYO', role: 'Interceptor', col: '#ffe14d', speed: 1.45, armor: 2, maxArmor: 4, rate: 0.065, dmg: 0.75, hit: 7, bombs: 1, weapon: 'needle', flame: 'flameY',
     flames: [[0, 40, 24, 56]], skill: 'Blanco pequeño · máxima cadencia',
@@ -44,6 +44,7 @@ function startGame() {
   const sh = SHIP.armor + D.armor;
   P = { x: W / 2, y: H - 180, tx: W / 2, ty: H - 180, px: W / 2, r: SHIP.hit * (D.id === 'easy' ? 0.85 : 1), shield: sh, maxShield: SHIP.maxArmor + D.armor,
     wl: SHIP.id === 'falcon' ? 2 : 1, bombs: SHIP.bombs, inv: 2.5, fireT: 0, missT: 0.5, alive: true, bank: 0, deadT: 0, regen: 0 };
+  initProgress();
   pB = []; eB = []; EN = []; PA = []; PU = []; RINGS = []; FT = []; LASERS = []; marks = [];
   score = 0; level = 1; stageT = 0; waveT = 1.5; boss = null; warnT = 0; newRecord = false;
   G.state = 'play'; G.phase = 'waves'; showBanner(); SFX.start(); setMusic('stage', 1);
@@ -55,13 +56,13 @@ const cd = s => s / D.fire;
 function eShot(x, y, a, spd, big = false) {
   SFX.eshot(x, big); eB.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: big ? 8 : 6, big }); }
 function addScore(pts, x, y, big) {
-  const v = Math.round(pts * D.score); score += v;
+  const v = Math.round(pts * D.score * scoreMult()); score += v;
   FT.push({ x, y, t: 0, s: '+' + v, big: !!big });
 }
 
 /* ---------------- Jugador ---------------- */
 function firePlayer() {
-  const x = P.x, y = P.y - 44, L = P.wl, dm = SHIP.dmg;
+  const x = P.x, y = P.y - 44, L = P.wl, dm = SHIP.dmg * lvlDmg();
   const add = (dx, a, spr, r, spd, extra) => pB.push(Object.assign({ x: x + dx, y: y + Math.abs(dx) * 0.4, vx: Math.sin(a) * spd, vy: -Math.cos(a) * spd, r, dmg: dm, rot: a, spr }, extra));
   switch (SHIP.weapon) {
     case 'plasma':
@@ -107,15 +108,6 @@ function nearestEnemy(x, y) {
     const d = (t.x - x) ** 2 + (t.y - y) ** 2; if (d < bd) best = t;
   }
   return best;
-}
-function hurtPlayer() {
-  if (P.inv > 0 || !P.alive) return;
-  P.shield--; P.wl = Math.max(SHIP.id === 'falcon' ? 2 : 1, P.wl - 1); P.inv = 2.2; shake = 14; SFX.hurt(); vib(90);
-  burst(P.x, P.y, 18, 'cyan', 260, 0.6, 1.1);
-  if (P.shield <= 0) {
-    P.alive = false; explode(P.x, P.y, 3); flash = 0.8; vib(400);
-    if (score > hi) { hi = score; newRecord = true; try { localStorage.setItem('ns_hi_' + D.id, hi); } catch (e) { } }
-  }
 }
 function useBomb() {
   if (!P || !P.alive || P.bombs <= 0 || G.state !== 'play') return;
@@ -277,9 +269,8 @@ function hitEnemy(e, d, x, y) {
     explode(e.x, e.y, e.type === 'bomber' ? 3 : big ? 2.2 : e.type === 'tank' ? 1.4 : 1);
     if (e.ground) marks.push({ x: e.x, y: e.y, s: 0.9 });
     if (e.type === 'mine') { const n = D.id === 'hard' ? 12 : D.id === 'easy' ? 6 : 8; for (let i = 0; i < n; i++) eShot(e.x, e.y, i / n * TAU + e.rot, 140 * D.bullet); }
-    const r = Math.random() / D.drop; let t = null;
-    if (big) { if (r < 0.4) t = 'P'; else if (r < 0.6) t = 'S'; else if (r < 0.75) t = 'B'; }
-    else if (r < 0.05) t = 'P'; else if (r < 0.072) t = 'S'; else if (r < 0.085) t = 'B';
+    dropXP(e.x, e.y, e.score / 50 * (big ? 1.5 : 1));
+    const t = rollDrop(big);
     if (t) PU.push({ x: e.x, y: e.y, t, tt: 0 });
   } else SFX.hit(x);
 }
@@ -328,7 +319,8 @@ function updateBoss(dt) {
       const cx = b.kind === 'vroar' ? b.head.x : b.x, cy = b.kind === 'vroar' ? b.head.y : b.y;
       explode(cx, cy, 5); explode(cx - 120, cy, 3); explode(cx + 120, cy, 3); flash = 1; shake = 24;
       if (b.kind === 'colossus') marks.push({ x: b.x, y: b.y, s: 4 });
-      for (const [t, dx] of [['P', -60], ['S', 0], ['B', 60]]) PU.push({ x: clamp(cx + dx, 40, W - 40), y: clamp(cy, 80, H * 0.6), t, tt: 0 });
+      dropXP(cx, cy, 60);
+      for (const [t, dx] of [['P', -70], ['V', 0], ['S', 70]]) PU.push({ x: clamp(cx + dx, 40, W - 40), y: clamp(cy, 80, H * 0.6), t, tt: 0 });
       boss = null; level++; stageT = 0; waveT = 4; G.phase = 'waves'; showBanner();
     }
     return;
@@ -493,7 +485,7 @@ function update(dt) {
     const vx = (P.x - P.px) / Math.max(dt, 0.001); P.px = P.x;
     P.bank += (clamp(vx / 700, -1, 1) - P.bank) * Math.min(1, dt * 10);
     P.inv = Math.max(0, P.inv - dt);
-    P.fireT -= dt; if (P.fireT <= 0) { P.fireT = SHIP.rate; firePlayer(); }
+    P.fireT -= dt; if (P.fireT <= 0) { P.fireT = SHIP.rate * lvlRate() * (P.buf.hyper > 0 ? 0.5 : 1); firePlayer(); }
     const mr = missileRate();
     if (mr) { P.missT -= dt; if (P.missT <= 0) { P.missT = mr; fireMissiles(); } }
     if (SHIP.id === 'titan' && P.shield < P.maxShield) {
@@ -516,17 +508,19 @@ function update(dt) {
     }
     b.x += b.vx * dt; b.y += b.vy * dt;
   }
-  for (const e of EN) updateEnemy(e, dt);
-  if (boss) updateBoss(dt);
-  updateLasers(dt);
-  for (const b of eB) { b.x += b.vx * dt; b.y += b.vy * dt; }
+  const eDt = dt * slowK();
+  for (const e of EN) updateEnemy(e, eDt);
+  if (boss) updateBoss(eDt);
+  updateLasers(eDt);
+  for (const b of eB) { b.x += b.vx * eDt; b.y += b.vy * eDt; }
+  updateBuffs(dt); updateXP(dt);
   collisions();
   pB = pB.filter(b => !b.dead && b.y > -50 && b.y < H + 50 && b.x > -50 && b.x < W + 50);
   eB = eB.filter(b => !b.dead && b.x > -30 && b.x < W + 30 && b.y > -30 && b.y < H + 30);
   EN = EN.filter(e => !e.dead);
   for (const u of PU) {
     u.tt += dt; u.y += 75 * dt; u.x += Math.sin(u.tt * 3) * 30 * dt;
-    if (P.alive) { const dx = P.x - u.x, dy = P.y - u.y, d = Math.hypot(dx, dy); if (d < 120 && d > 0) { u.x += dx / d * 420 * dt; u.y += dy / d * 420 * dt; } }
+    if (P.alive) { const dx = P.x - u.x, dy = P.y - u.y, d = Math.hypot(dx, dy); if (d < (P.buf.magnet > 0 ? 2000 : 120) && d > 0) { u.x += dx / d * 420 * dt; u.y += dy / d * 420 * dt; } }
   }
   PU = PU.filter(u => !u.dead && u.y < H + 30);
   const damp = Math.pow(0.04, dt);
@@ -578,12 +572,7 @@ function collisions() {
   for (const u of PU) {
     const dx = u.x - P.x, dy = u.y - P.y;
     if (dx * dx + dy * dy < 34 * 34) {
-      u.dead = true; SFX.power(); burst(u.x, u.y, 14, u.t === 'P' ? 'cyan' : u.t === 'S' ? 'green' : 'fire', 200, 0.5, 0.8);
-      let txt2;
-      if (u.t === 'P') { if (P.wl < 5) { P.wl++; txt2 = 'ARMA ' + P.wl; } else { score += 1000; txt2 = '+1000'; } }
-      else if (u.t === 'S') { if (P.shield < P.maxShield) { P.shield++; txt2 = '+ESCUDO'; } else { score += 1000; txt2 = '+1000'; } }
-      else { if (P.bombs < 5) { P.bombs++; txt2 = '+BOMBA'; } else { score += 1000; txt2 = '+1000'; } }
-      FT.push({ x: u.x, y: u.y - 20, t: 0, s: txt2, col: u.t === 'P' ? '#7ff6ff' : u.t === 'S' ? '#7fffc0' : '#ffc080' });
+      u.dead = true; collectPU(u);
     }
   }
 }

@@ -108,12 +108,13 @@ function drawWorld() {
     ctx.globalCompositeOperation = 'lighter'; drawSpr(u.t === 'P' ? GLOW.cyan : u.t === 'S' ? GLOW.green : GLOW.fire, u.x, u.y, 0, 2.2); ctx.globalCompositeOperation = 'source-over';
     drawSpr(SPR['pu' + u.t], u.x, u.y, 0, s);
   }
+  drawXP();
   for (const e of EN) if (!e.ground && e.delay <= 0) drawEnemy(e);
   if (boss && boss.kind !== 'colossus') drawBoss(boss);
   ctx.globalCompositeOperation = 'lighter';
   for (const b of pB) drawSpr(b.spr, b.x, b.y, b.rot);
   ctx.globalCompositeOperation = 'source-over';
-  drawPlayer();
+  drawPlayerFx(); drawEscorts(); drawPlayer();
   // partículas: humo y restos, luego brillos
   for (const p of PA) {
     if (p.smoke) { const k = 1 - p.life / p.max; ctx.globalAlpha = (1 - k) * 0.8; drawSpr(SPR.smoke, p.x, p.y, 0, p.s * (0.8 + k * 1.6)); }
@@ -201,9 +202,7 @@ function drawHUD() {
     ctx.fillStyle = i < P.shield ? '#39ff88' : 'rgba(57,255,136,0.12)'; ctx.fill();
     ctx.strokeStyle = 'rgba(57,255,136,0.7)'; ctx.lineWidth = 1.5; ctx.stroke();
   }
-  const ax = 30 + P.maxShield * 20;
-  txt('ARMA', ax, H - 64, 11, '#ff9af0', 'left', null, 800);
-  for (let i = 0; i < 5; i++) { ctx.fillStyle = i < P.wl ? '#ff2bd6' : 'rgba(255,43,214,0.15)'; ctx.fillRect(ax + i * 13, H - 52, 9, 20); }
+  drawProgressHUD();
   const bx = UI.bomb[0], by = H - 74;
   ctx.fillStyle = P.bombs > 0 ? 'rgba(255,120,30,0.18)' : 'rgba(80,80,80,0.2)'; ctx.beginPath(); ctx.arc(bx, by, 40, 0, TAU); ctx.fill();
   ctx.strokeStyle = P.bombs > 0 ? '#ff8a2b' : '#555'; ctx.lineWidth = 3; ctx.stroke();

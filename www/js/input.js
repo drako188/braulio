@@ -67,7 +67,7 @@ window.onBack = () => {
   if (G.state === 'paused' || G.state === 'over') { G.state = 'menu'; return true; }
   return false;
 };
-window.__ns = { G, get P() { return P; }, get EN() { return EN; }, get boss() { return boss; }, setStage(t) { stageT = t; }, setLevel(l) { level = l; }, startGame,
+window.__ns = { G, get P() { return P; }, get EN() { return EN; }, get boss() { return boss; }, setStage(t) { stageT = t; }, setLevel(l) { level = l; }, startGame, give(t) { collectPU({ x: P.x, y: P.y, t }); }, get XC() { return XC; },
   pick(s, d) { selShip = s; selDiff = d; }, spawn(t, x, y, o) { return addEnemy(t, x, y, o); } };
 
 /* ---------------- Loop ---------------- */
