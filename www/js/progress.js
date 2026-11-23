@@ -75,7 +75,7 @@ function gainXP(v) {
   if (P.lvl >= MAX_LVL) P.xp = 0;
 }
 function levelUp() {
-  P.lvl++; syncWeapon(); P.lvlFx = 1.2;
+  P.lvl++; syncWeapon(); P.lvlFx = 1.2; ACH.lvl(P.lvl);
   RINGS.push({ x: P.x, y: P.y, t: 0, dur: 0.6, r: 140, c: 'rgba(0,229,255,' });
   burst(P.x, P.y, 26, 'cyan', 300, 0.6, 0.9);
   FT.push({ x: P.x, y: P.y - 70, t: 0, s: P.lvl >= MAX_LVL ? 'NIVEL MÁXIMO' : 'NIVEL ' + P.lvl, big: true, col: '#7ff6ff' });
@@ -114,7 +114,7 @@ function hurtPlayer() {
     RINGS.push({ x: P.x, y: P.y, t: 0, dur: 0.35, r: 70, c: 'rgba(127,246,255,' });
     return;
   }
-  P.shield--; shake = 14; SFX.hurt(); vib(90);
+  P.shield--; BOSSFIGHT.hurt = true; shake = 14; SFX.hurt(); vib(90);
   if (P.lvl > minLvl()) { P.lvl--; syncWeapon(); FT.push({ x: P.x, y: P.y - 60, t: 0, s: 'NIVEL ' + P.lvl, col: '#ff7a8a' }); }
   P.xp = 0; P.inv = D.inv; comboBreak();
   burst(P.x, P.y, 18, 'cyan', 260, 0.6, 1.1);
@@ -146,7 +146,7 @@ function rollDrop(big) {
   return 'P';
 }
 function collectPU(u) {
-  const def = PUDEF[u.t]; let label = def[2];
+  const def = PUDEF[u.t]; let label = def[2]; ACH.pu();
   SFX.power(); burst(u.x, u.y, 14, 'cyan', 200, 0.5, 0.8);
   switch (u.t) {
     case 'P': if (P.lvl < MAX_LVL) { P.xp = 0; levelUp(); return; } score += 1000; label = '+1000'; break;

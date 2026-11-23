@@ -14,6 +14,14 @@ y derriba oleadas de drones, interceptores, giro-drones y la gran **nave nodriza
 - En el **HANGAR** cada nave tiene 5 mejoras permanentes de 5 niveles (80 → 1000 monedas):
   **Blindaje** (+1 escudo máximo, +1 inicial cada 2 niveles), **Daño** (+6 %), **Cadencia** (+4 %), **Ultra** (+15 % de carga) e **Imán** (más alcance).
 
+### Logros y misiones diarias
+- **34 logros** con recompensa en monedas: derrotar a cada uno de los 10 jefes, combos de 25/50/100, nivel máximo,
+  vencer a un jefe sin recibir daño o sin bombas, 500/5.000 derribos, 50 ULTRA, 50 élites, 100 tanques,
+  250.000 y 1.000.000 de puntos, desbloquear todas las naves, mejorar una nave al máximo, Ciclo 2, y más.
+- **3 misiones diarias** que cambian cada día (destruir enemigos, élites o tanques, derrotar jefes, combos,
+  monedas, ULTRA, sectores, power-ups, eventos). Dan entre 100 y 300 monedas.
+- Botón del trofeo en el menú (con un punto rojo si quedan misiones del día) y aviso en pantalla al completar algo.
+
 ### Niveles, escudo y vidas
 - Los enemigos sueltan **cristales de XP** (verdes = 1, morados = 5). Al llenar la barra, la nave **sube de nivel (1–10)**:
   más disparos, +7 % de daño y +2,5 % de cadencia por nivel. Desde nivel 4 la nave brilla y en nivel 10 su aura es dorada.
@@ -110,7 +118,7 @@ En **⚙ Ajustes** se puede activar/desactivar y regular la música y los efecto
 ## Estructura
 - `www/index.html` + `www/js/` — el juego (HTML5 Canvas, sin dependencias):
   `core` (pantalla y utilidades), `sprites`, `background`, `audio` (efectos y música),
-  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `shipskins` (diseño de las naves), `bossskins` (diseño de los jefes), `bosses` (los 10 jefes), `chaos` (eventos, élites y combos), `themes` (escenarios y clima), `shop` (monedas y hangar), `render` (dibujo y menús), `input` (controles y bucle).
+  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `shipskins` (diseño de las naves), `bossskins` (diseño de los jefes), `bosses` (los 10 jefes), `chaos` (eventos, élites y combos), `themes` (escenarios y clima), `shop` (monedas y hangar), `achievements` (logros y misiones), `render` (dibujo y menús), `input` (controles y bucle).
   Se puede abrir `www/index.html` directamente en un navegador para probarlo.
 - `android/` — app Android nativa (WebView a pantalla completa) que empaqueta `www/` como assets.
 - `.github/workflows/android.yml` — compila el APK automáticamente en GitHub Actions.

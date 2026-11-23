@@ -251,7 +251,7 @@ const ULTS = {
 function useUltra() {
   if (!P || !P.alive || G.state !== 'play' || P.ult < 100 || P.ultT > 0) return;
   const U = ULTS[SHIP.id];
-  P.ult = 0; P.ultT = U.dur; P.ultA = 0;
+  P.ult = 0; P.ultT = U.dur; P.ultA = 0; ACH.ultra();
   if (U.start) U.start();
   flash = 0.5; shake = 14; vib(220); SFX.ultra();
   FT.push({ x: W / 2, y: H * 0.45, t: 0, s: U.name, big: true, col: SHIP.col });

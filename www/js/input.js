@@ -30,6 +30,8 @@ cv.addEventListener('pointerdown', e => {
   if (G.state === 'settings') { settingsTap(x, y); return; }
   if (near(x, y, UI.mute, 30) && G.state !== 'over') { G.prev = G.state === 'play' ? 'paused' : G.state; G.state = 'settings'; dragId = null; SFX.ui(); return; }
   if (G.state === 'hangar') { hangarTap(x, y); return; }
+  if (G.state === 'achievements') { achTapDown(x, y); return; }
+  if (G.state === 'menu' && near(x, y, ACH_BTN(), 32)) { G.state = 'achievements'; achScroll = 0; SFX.ui(); return; }
   if (G.state === 'menu') { menuTap(x, y); return; }
   if (G.state === 'over') { if (overT > 1) G.state = 'menu'; return; }
   if (G.state === 'paused') { if (inR(x, y, pauseLayout().menu)) G.state = 'menu'; else G.state = 'play'; return; }
@@ -39,12 +41,13 @@ cv.addEventListener('pointerdown', e => {
   if (dragId === null) { dragId = e.pointerId; lastX = x; lastY = y; if (P) { P.tx = P.x; P.ty = P.y; } try { cv.setPointerCapture(e.pointerId); } catch (_) { } }
 });
 cv.addEventListener('pointermove', e => {
+  if (G.state === 'achievements') { achMove(toGame(e)[1]); return; }
   if (e.pointerId !== dragId || G.state !== 'play' || !P.alive) return;
   const [x, y] = toGame(e);
   P.tx = clamp(P.tx + (x - lastX) * 1.15, 26, W - 26); P.ty = clamp(P.ty + (y - lastY) * 1.15, 70, H - 50);
   lastX = x; lastY = y;
 });
-const endDrag = e => { if (e.pointerId === dragId) dragId = null; };
+const endDrag = e => { achDragY = null; if (e.pointerId === dragId) dragId = null; };
 cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
 addEventListener('keydown', e => {
   keys[e.code] = true; initAudio();
@@ -67,7 +70,7 @@ window.onAppPause = () => { if (G.state === 'play') G.state = 'paused'; };
 window.onBack = () => {
   if (G.state === 'play') { G.state = 'paused'; return true; }
   if (G.state === 'settings') { G.state = G.prev || 'menu'; return true; }
-  if (G.state === 'hangar') { G.state = 'menu'; return true; }
+  if (G.state === 'hangar' || G.state === 'achievements') { G.state = 'menu'; return true; }
   if (G.state === 'paused' || G.state === 'over') { G.state = 'menu'; return true; }
   return false;
 };

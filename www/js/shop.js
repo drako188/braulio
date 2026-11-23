@@ -52,7 +52,7 @@ function coinsForKill(e, big) {
   return n;
 }
 function addCoins(v) {
-  const c = v * COIN_MULT[D.id]; runCoins += c; SAVE.coins += c; saveData();
+  const c = v * COIN_MULT[D.id]; runCoins += c; SAVE.coins += c; ACH.coins(c); saveData();
 }
 const magRadius = () => 95 + upg('mag') * 30;
 
@@ -64,14 +64,14 @@ function buyUpgrade(k) {
   const cost = UPG_COST[lv];
   if (SAVE.coins < cost) { hangarMsg = { t: 1.5, s: 'Monedas insuficientes', col: '#ff7a8a' }; SFX.tink(); return; }
   SAVE.coins -= cost; (SAVE.upg[id] || (SAVE.upg[id] = {}))[k] = lv + 1; saveData(true);
-  hangarMsg = { t: 1.5, s: '¡Mejora comprada!', col: '#39ff88' }; SFX.power();
+  hangarMsg = { t: 1.5, s: '¡Mejora comprada!', col: '#39ff88' }; SFX.power(); ACH.shop();
 }
 function buyShip(id) {
   const cost = SHIP_PRICE[id];
   if (isUnlocked(id) || !cost) return;
   if (SAVE.coins < cost) { hangarMsg = { t: 1.5, s: 'Monedas insuficientes', col: '#ff7a8a' }; SFX.tink(); return; }
   SAVE.coins -= cost; SAVE.unlocked.push(id); saveData(true);
-  hangarMsg = { t: 2, s: '¡' + SHIPS.find(s => s.id === id).name + ' desbloqueada!', col: '#ffd23f' }; SFX.levelUp();
+  hangarMsg = { t: 2, s: '¡' + SHIPS.find(s => s.id === id).name + ' desbloqueada!', col: '#ffd23f' }; SFX.levelUp(); ACH.shop();
 }
 function hangarLayout() {
   const top = H * 0.34, rowH = Math.min(86, (H - 120 - top) / 5);

@@ -611,12 +611,12 @@ function spawnBoss() {
   boss = { idx, kind: Df.kind, name: Df.name, x: W / 2, y: -170, hp, maxhp: hp, t: 0, hit: 0, enter: true, a1: 1, a2: 0.5, a3: 4, spin: 0, dying: 0,
     ta: [Math.PI / 2, Math.PI / 2, Math.PI / 2, Math.PI / 2], rage: false };
   Df.init(boss);
-  G.phase = 'boss'; setMusic('boss', idx); prepareTheme(level);
+  G.phase = 'boss'; setMusic('boss', idx); prepareTheme(level); ACH.bossStart();
 }
 function bossBoxes(b) { return bossDef(b).boxes(b); }
 function checkBossDeath() {
   if (!boss || boss.dying || boss.hp > 0) return;
-  boss.hp = 0; boss.dying = 0.001; SFX.bossDie(); vib(300); setMusic('victory', level + 1); eB.length = 0; LASERS = [];
+  boss.hp = 0; boss.dying = 0.001; ACH.bossKill(boss.idx); SFX.bossDie(); vib(300); setMusic('victory', level + 1); eB.length = 0; LASERS = [];
   const [cx, cy] = bossCenter(); addScore(10000 * level, cx, cy, true);
 }
 function damageBoss(d, x, y, quiet) {

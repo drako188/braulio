@@ -40,7 +40,7 @@ function startGame() {
   P = { x: W / 2, y: H - 180, tx: W / 2, ty: H - 180, px: W / 2, r: SHIP.hit * (D.id === 'easy' ? 0.85 : 1), shield: sh, maxShield: SHIP.maxArmor + D.armor,
     wl: SHIP.id === 'falcon' ? 2 : 1, bombs: SHIP.bombs, inv: 2.5, fireT: 0, missT: 0.5, alive: true, bank: 0, deadT: 0, regen: 0 };
   initProgress();
-  P.maxShield += upg('arm'); P.shield = startShield(); runCoins = 0;
+  P.maxShield += upg('arm'); P.shield = startShield(); runCoins = 0; ACH.start();
   P.ult = 0; P.ultT = 0; P.revive = SHIP.id === 'fenix'; STRIKES = []; NOVA = null; HOLE = null; BEAM = null;
   pB = []; eB = []; EN = []; PA = []; PU = []; RINGS = []; FT = []; LASERS = []; marks = [];
   score = 0; level = 1; stageT = 0; waveT = 1.5; boss = null; warnT = 0; newRecord = false;
@@ -48,7 +48,7 @@ function startGame() {
   COMBO.n = 0; COMBO.t = 0; COMBO.best = 0; eventT = rand(10, 14); lastEvent = -1; bgSpeed = 70;
   G.state = 'play'; G.phase = 'waves'; showBanner(); SFX.start(); setMusic('stage', 1);
 }
-function showBanner() { banner = { t: 0, a: 'SECTOR ' + level, b: SECTORS[(level - 1) % SECTORS.length] }; setTheme((level - 1) % THEMES.length); }
+function showBanner() { banner = { t: 0, a: 'SECTOR ' + level, b: SECTORS[(level - 1) % SECTORS.length] }; setTheme((level - 1) % THEMES.length); ACH.sector(level); }
 const aim = (x, y) => Math.atan2(P.y - y, P.x - x);
 const bspd = () => Math.min(410, (175 + level * 18) * D.bullet);
 const cd = s => s / D.fire;
@@ -116,7 +116,7 @@ function nearestEnemy(x, y) {
 }
 function useBomb() {
   if (!P || !P.alive || P.bombs <= 0 || G.state !== 'play') return;
-  P.bombs--; flash = 1; shake = 20; SFX.bomb(); vib(160);
+  P.bombs--; BOSSFIGHT.bomb = true; flash = 1; shake = 20; SFX.bomb(); vib(160);
   RINGS.push({ x: P.x, y: P.y, t: 0, dur: 0.8, r: 900, c: 'rgba(255,170,80,' });
   for (const b of eB) { b.dead = true; PA.push({ x: b.x, y: b.y, vx: 0, vy: 0, life: 0.4, max: 0.4, s: 0.7, c: 'yellow' }); score += 10; }
   LASERS = [];
@@ -280,7 +280,7 @@ function hitEnemy(e, d, x, y) {
   e.hp -= d; e.hit = 0.06;
   burst(x, y, 3, 'cyan', 140, 0.25, 0.5);
   if (e.hp <= 0 && !e.dead) {
-    e.dead = true; comboKill(); addScore(e.score, e.x, e.y); gainUlt(e.score / 60);
+    e.dead = true; comboKill(); ACH.kill(e); addScore(e.score, e.x, e.y); gainUlt(e.score / 60);
     const big = e.type === 'spinner' || e.type === 'cruiser' || e.type === 'bomber';
     explode(e.x, e.y, e.type === 'bomber' ? 3 : big ? 2.2 : e.type === 'tank' ? 1.4 : 1);
     if (e.ground) marks.push({ x: e.x, y: e.y, s: 0.9 });
@@ -427,7 +427,7 @@ function explode(x, y, s = 1) {
 /* ---------------- Update ---------------- */
 function update(dt) {
   G.t += dt;
-  const inMenu = G.state === 'menu' || G.state === 'hangar' || (G.state === 'settings' && (G.prev === 'menu' || G.prev === 'hangar'));
+  const inMenu = G.state === 'menu' || G.state === 'hangar' || G.state === 'achievements' || (G.state === 'settings' && (G.prev === 'menu' || G.prev === 'hangar' || G.prev === 'achievements'));
   if (inMenu) setMusic('menu'); else if (G.state === 'over') setMusic('over');
   duckMusic(G.state === 'paused' || (G.state === 'settings' && !inMenu));
   if (G.state !== 'play') laserHum(false);
@@ -435,7 +435,7 @@ function update(dt) {
   if (G.state === 'paused' || G.state === 'settings') { if (inMenu) updateBG(dt); return; }
   updateBG(dt);
   shake = Math.max(0, shake - dt * 30); flash = Math.max(0, flash - dt * 2.2);
-  if (G.state === 'menu' || G.state === 'hangar') return;
+  if (G.state === 'menu' || G.state === 'hangar' || G.state === 'achievements') return;
   stageT += dt;
   if (banner) { banner.t += dt; if (banner.t > 3) banner = null; }
   if (P.alive) {
@@ -459,7 +459,7 @@ function update(dt) {
     }
   } else {
     P.deadT += dt;
-    if (P.deadT > 1.6 && G.state === 'play') { G.state = 'over'; overT = 0; saveData(true); }
+    if (P.deadT > 1.6 && G.state === 'play') { G.state = 'over'; overT = 0; ACH.runEnd(); }
   }
   if (G.state === 'over') overT += dt;
   if (G.state === 'play') spawner(dt);

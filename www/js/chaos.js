@@ -46,7 +46,7 @@ function drawEliteRing(e) {
 const COMBO = { n: 0, t: 0, best: 0 };
 const comboMult = () => 1 + Math.min(COMBO.n, 40) / 10;
 function comboKill(x, y) {
-  COMBO.n++; COMBO.t = 2.4; COMBO.best = Math.max(COMBO.best, COMBO.n);
+  COMBO.n++; COMBO.t = 2.4; COMBO.best = Math.max(COMBO.best, COMBO.n); ACH.combo(COMBO.n);
   if (COMBO.n % 10 === 0) { FT.push({ x: W / 2, y: H * 0.3, t: 0, s: 'COMBO ' + COMBO.n + '!', big: true, col: '#ffd23f' }); SFX.ultReady(); }
 }
 function comboBreak() { if (COMBO.n >= 5) FT.push({ x: W / 2, y: 70, t: 0, s: 'COMBO PERDIDO', col: '#ff7a8a' }); COMBO.n = 0; COMBO.t = 0; }
@@ -94,7 +94,7 @@ function runEvent() {
   const i = pick(opts); lastEvent = i;
   const [name, col, fn] = EVENTS[i];
   FT.push({ x: W / 2, y: H * 0.28, t: 0, s: name, big: true, col });
-  SFX.warn(); fn();
+  SFX.warn(); fn(); ACH.event();
 }
 function updateChaos(dt) {
   COMBO.t -= dt; if (COMBO.t <= 0 && COMBO.n) { COMBO.n = 0; }

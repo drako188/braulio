@@ -273,7 +273,7 @@ function drawMenu() {
     for (let k = 0; k < 10; k++) { ctx.fillStyle = k < v ? S.col : 'rgba(255,255,255,0.07)'; ctx.fillRect(167 + k * 26, y - 5, 22, 10); }
   });
   wrapText(S.desc, W / 2, H * 0.625 + 4 * 25 + 6, W - 70, 19, 14, '#c8d4e6');
-  drawMenuButtons();
+  drawMenuButtons(); drawAchButton();
   txt('RÉCORD ' + DIFFS[selDiff].name + '  ' + getHi(selDiff), W / 2, H * 0.94, 15, '#ffcf6a', 'center', null, 800);
   drawGear();
 }
@@ -298,13 +298,14 @@ function render() {
   const sx = shake > 0 ? rand(-shake, shake) * 0.5 : 0, sy = shake > 0 ? rand(-shake, shake) * 0.5 : 0;
   ctx.setTransform(k, 0, 0, k, sx * k, sy * k);
   drawBG();
-  const under = G.state === 'settings' ? G.prev : G.state, menuLike = under === 'menu' || under === 'hangar';
+  const under = G.state === 'settings' ? G.prev : G.state, menuLike = under === 'menu' || under === 'hangar' || under === 'achievements';
   if (menuLike) drawClouds(); else drawWorld();
   ctx.setTransform(k, 0, 0, k, 0, 0);
   if (VIG) ctx.drawImage(VIG, 0, 0, W, H);
   if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * 0.55})`; ctx.fillRect(0, 0, W, H); }
   if (under === 'menu') drawMenu();
   else if (under === 'hangar') drawHangar();
+  else if (under === 'achievements') drawAchievements();
   else {
     drawHUD();
     if (under === 'over') drawOver();
@@ -316,4 +317,5 @@ function render() {
     }
   }
   if (G.state === 'settings') drawSettings();
+  drawToasts();
 }
