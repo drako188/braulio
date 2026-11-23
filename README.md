@@ -4,11 +4,40 @@ Shooter vertical futurista para Android: pilota un caza estelar sobre una ciudad
 y derriba oleadas de drones, interceptores, giro-drones y la gran **nave nodriza** al final de cada sector.
 
 ## Cómo se juega
-- **Arrastra** el dedo en cualquier parte de la pantalla para mover la nave (disparo automático).
+- En el menú elige **dificultad** y **nave**, y pulsa **DESPEGAR**.
+- **Arrastra** el dedo para mover la nave (disparo automático).
 - **Botón naranja (bomba):** borra todas las balas enemigas y daña a todos los enemigos.
-- Power-ups: **P** mejora el arma (5 niveles, misiles teledirigidos desde el nivel 4),
-  **S** recupera escudo, **B** bomba extra.
-- Cada sector termina con un jefe; tras derrotarlo la dificultad sube.
+- Power-ups: **P** mejora el arma (5 niveles), **S** recupera escudo, **B** bomba extra.
+
+### Dificultades
+| | Fácil | Intermedio | Difícil |
+|---|---|---|---|
+| Vida enemiga | ×0.7 | ×1 | ×1.45 |
+| Velocidad/cadencia de balas | menor | normal | mayor |
+| Escudo inicial | +1 | — | — |
+| Power-ups | más | normal | menos |
+| Puntos | ×0.7 | ×1 | ×1.6 |
+
+Cada dificultad guarda su propio récord.
+
+### Naves
+| Nave | Fortaleza | Debilidad | Habilidad |
+|---|---|---|---|
+| **Halcón** | Equilibrada, plasma en abanico | — | Empieza con arma nivel 2 |
+| **Rayo** | La más rápida, cadencia extrema, blanco pequeño | Solo 2 de escudo, poco daño por disparo | — |
+| **Titán** | 5 de escudo, obuses de mucho daño, 3 bombas | Lenta, blanco grande, dispara despacio | Recupera 1 escudo cada 25 s |
+| **Espectro** | Ondas que atraviesan enemigos | Cañón débil, escudo máx. 4 | Misiles teledirigidos desde el inicio |
+
+### Enemigos
+Drones, cazas en picado, cazas interceptores laterales, kamikazes, minas (estallan en balas),
+giro-drones, cruceros, bombarderos pesados y **tanques terrestres** con torreta giratoria.
+
+### Jefes finales (rotan cada sector)
+1. **Nave Nodriza**: torretas, espirales y anillos de balas.
+2. **Coloso Blindado**: fortaleza terrestre con cañones dobles y **rayos láser** (aviso rojo antes de disparar).
+3. **VROAR**: serpiente mecánica de 14 segmentos. Su cabeza recibe todo el daño y su rugido anuncia un aliento de fuego.
+
+Al bajar del 50 % de vida, cada jefe entra en modo furia.
 
 ## Estructura
 - `www/index.html` — el juego completo (HTML5 Canvas, sin dependencias, sonido sintetizado).
