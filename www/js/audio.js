@@ -73,6 +73,8 @@ const SFX = {
       case 'plasma': if (throttle('fp', 95)) { tone(1500, 0.07, 'square', 0.022, 520, 0, p); tone(3000, 0.04, 'triangle', 0.015, 1400, 0, p); } break;
       case 'needle': if (throttle('fn', 80)) { tone(2600, 0.035, 'triangle', 0.02, 1900, 0, p); noise(0.03, 0.03, 9000, 0, p, 'highpass', 0); } break;
       case 'cannon': if (throttle('fc', 150)) { tone(170, 0.16, 'sine', 0.13, 55, 0, p); noise(0.12, 0.07, 900, 0, p, 'lowpass', 120); tone(420, 0.05, 'square', 0.02, 200, 0, p); } break;
+      case 'flame': if (throttle('ff', 110)) { noise(0.16, 0.07, 1800, 0, p, 'bandpass', 600, 1.2); noise(0.1, 0.03, 400, 0, p, 'lowpass', 100); } break;
+      case 'twin': if (throttle('ft', 110)) { tone(1800, 0.05, 'square', 0.016, 900, 0, p); tone(900, 0.06, 'triangle', 0.02, 500, 0, p); } break;
       case 'wave': if (throttle('fw', 120)) { tone(320, 0.16, 'sine', 0.06, 760, 0, p); tone(640, 0.12, 'triangle', 0.025, 1500, 0, p); } break;
     }
   },
@@ -104,28 +106,32 @@ const SFX = {
   levelUp() { [523, 784, 1046, 1568].forEach((f, i) => { tone(f, 0.18, 'square', 0.05, 0, i * 0.06); tone(f / 2, 0.2, 'triangle', 0.06, 0, i * 0.06); }); tone(200, 0.5, 'sawtooth', 0.04, 1600, 0, 0, 0.2); },
   xp() { if (throttle('xp', 45)) { XPC.n = performance.now() - XPC.t < 400 ? Math.min(XPC.n + 1, 14) : 0; XPC.t = performance.now(); tone(1046 * Math.pow(2, XPC.n / 12), 0.07, 'sine', 0.05, 0, 0); } },
   barrier() { tone(900, 0.25, 'sine', 0.1, 300); noise(0.2, 0.08, 6000, 0, 0, 'bandpass', 2000, 3); },
+  ultra() { tone(120, 1.2, 'sawtooth', 0.12, 900, 0, 0, 0.1); tone(240, 1.0, 'square', 0.05, 1800, 0, 0, 0.3); noise(1.2, 0.3, 3000, 0.15, 0, 'lowpass', 60); tone(55, 1.2, 'sine', 0.35, 30, 0.15); },
+  ultReady() { [660, 880, 1320].forEach((f, i) => tone(f, 0.2, 'triangle', 0.09, 0, i * 0.08)); },
   ui() { tone(1200, 0.05, 'triangle', 0.06, 1800); }
 };
 
 /* ---------------- Zumbido continuo de los láseres ---------------- */
-let hum = null;
-function laserHum(on) {
+const HUMS = {};
+function humCtl(key, on, f1 = 98, f2 = 197, vol = 0.1, lfoF = 22, cut = 1300) {
   if (!AC) return;
-  const t = AC.currentTime;
-  if (on && !hum && SET.sfx) {
+  const t = AC.currentTime, h = HUMS[key];
+  if (on && !h && SET.sfx) {
     const o1 = AC.createOscillator(), o2 = AC.createOscillator(), lfo = AC.createOscillator(), lg2 = AC.createGain(), f = AC.createBiquadFilter(), g = AC.createGain();
-    o1.type = 'sawtooth'; o1.frequency.value = 98; o2.type = 'square'; o2.frequency.value = 197;
-    lfo.frequency.value = 22; lg2.gain.value = 500; lfo.connect(lg2); lg2.connect(f.frequency);
-    f.type = 'lowpass'; f.frequency.value = 1300; f.Q.value = 4;
-    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.1, t + 0.08);
+    o1.type = 'sawtooth'; o1.frequency.value = f1; o2.type = 'square'; o2.frequency.value = f2;
+    lfo.frequency.value = lfoF; lg2.gain.value = cut * 0.4; lfo.connect(lg2); lg2.connect(f.frequency);
+    f.type = 'lowpass'; f.frequency.value = cut; f.Q.value = 4;
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.08);
     o1.connect(f); o2.connect(f); f.connect(g); g.connect(sfxBus); o1.start(); o2.start(); lfo.start();
-    hum = { o: [o1, o2, lfo], g };
-  } else if (!on && hum) {
-    hum.g.gain.cancelScheduledValues(t); hum.g.gain.setValueAtTime(hum.g.gain.value, t); hum.g.gain.linearRampToValueAtTime(0.0001, t + 0.15);
-    for (const o of hum.o) o.stop(t + 0.2);
-    hum = null;
+    HUMS[key] = { o: [o1, o2, lfo], g };
+  } else if (!on && h) {
+    h.g.gain.cancelScheduledValues(t); h.g.gain.setValueAtTime(h.g.gain.value, t); h.g.gain.linearRampToValueAtTime(0.0001, t + 0.15);
+    for (const o of h.o) o.stop(t + 0.2);
+    delete HUMS[key];
   }
 }
+function laserHum(on) { humCtl('laser', on); }
+function stopHums() { for (const k in HUMS) humCtl(k, false); }
 
 /* =====================================================================
    MÚSICA — secuenciador synthwave
@@ -282,5 +288,5 @@ function setMusic(kind, seed = 0) {
 }
 document.addEventListener('visibilitychange', () => {
   if (!AC) return;
-  if (document.hidden) { AC.suspend(); laserHum(false); } else AC.resume();
+  if (document.hidden) { AC.suspend(); stopHums(); } else AC.resume();
 });

@@ -34,6 +34,7 @@ cv.addEventListener('pointerdown', e => {
   if (G.state === 'paused') { if (inR(x, y, pauseLayout().menu)) G.state = 'menu'; else G.state = 'play'; return; }
   if (near(x, y, UI.pause, 30)) { G.state = 'paused'; dragId = null; return; }
   if (near(x, y, [UI.bomb[0], H - 74], 46)) { useBomb(); return; }
+  if (near(x, y, ULT_BTN(), 40)) { useUltra(); return; }
   if (dragId === null) { dragId = e.pointerId; lastX = x; lastY = y; if (P) { P.tx = P.x; P.ty = P.y; } try { cv.setPointerCapture(e.pointerId); } catch (_) { } }
 });
 cv.addEventListener('pointermove', e => {
@@ -55,6 +56,7 @@ addEventListener('keydown', e => {
     return;
   }
   if (e.code === 'Space' || e.code === 'KeyX') useBomb();
+  if (e.code === 'KeyC' || e.code === 'KeyU') useUltra();
   if (e.code === 'KeyP' || e.code === 'Escape') { if (G.state === 'play') G.state = 'paused'; else if (G.state === 'paused') G.state = 'play'; }
   if (e.code === 'Enter' && G.state === 'over' && overT > 1) G.state = 'menu';
 });
@@ -67,7 +69,7 @@ window.onBack = () => {
   if (G.state === 'paused' || G.state === 'over') { G.state = 'menu'; return true; }
   return false;
 };
-window.__ns = { G, get P() { return P; }, get EN() { return EN; }, get boss() { return boss; }, setStage(t) { stageT = t; }, setLevel(l) { level = l; }, startGame, give(t) { collectPU({ x: P.x, y: P.y, t }); }, get XC() { return XC; },
+window.__ns = { G, get P() { return P; }, get EN() { return EN; }, get boss() { return boss; }, setStage(t) { stageT = t; }, setLevel(l) { level = l; }, startGame, ult() { P.ult = 100; }, give(t) { collectPU({ x: P.x, y: P.y, t }); }, get XC() { return XC; },
   pick(s, d) { selShip = s; selDiff = d; }, spawn(t, x, y, o) { return addEnemy(t, x, y, o); } };
 
 /* ---------------- Loop ---------------- */

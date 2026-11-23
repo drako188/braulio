@@ -24,7 +24,7 @@ function makePU2(label, col, size = 19) {
 const PUDEF = {
   P: ['P', '#00e5ff', 'NIVEL +1', 30], S: ['S', '#39ff88', 'ESCUDO', 14], B: ['B', '#ff8a2b', 'BOMBA', 8],
   D: ['D', '#7c4dff', 'DRONES ESCOLTA', 8], E: ['E', '#7ff6ff', 'BARRERA', 8], H: ['H', '#ffe14d', 'HIPER-CADENCIA', 9],
-  M: ['M', '#ff2bd6', 'IMÁN', 8], T: ['T', '#9ab8ff', 'TIEMPO LENTO', 6], X: ['×2', '#ffb800', 'PUNTOS ×2', 7], V: ['1UP', '#ff3355', 'VIDA EXTRA', 2]
+  M: ['M', '#ff2bd6', 'IMÁN', 8], U: ['ULT', '#e8e8ff', 'CARGA ULTRA', 6], T: ['T', '#9ab8ff', 'TIEMPO LENTO', 6], X: ['×2', '#ffb800', 'PUNTOS ×2', 7], V: ['1UP', '#ff3355', 'VIDA EXTRA', 2]
 };
 for (const k in PUDEF) SPR['pu' + k] = makePU2(PUDEF[k][0], PUDEF[k][1], PUDEF[k][0].length > 2 ? 13 : PUDEF[k][0].length > 1 ? 16 : 19);
 const BUFFS = { D: ['drone', 20], H: ['hyper', 10], M: ['magnet', 15], T: ['slow', 6], X: ['mult', 15] };
@@ -55,7 +55,7 @@ function initProgress() {
   P.esc = [{ x: P.x - 50, y: P.y + 10, ft: 0 }, { x: P.x + 50, y: P.y + 10, ft: 0.09 }];
   XC = [];
 }
-const slowK = () => (P && P.buf && P.buf.slow > 0 ? 0.45 : 1);
+const slowK = () => (P && P.ultT > 0 && SHIP.id === 'rayo' ? 0.35 : P && P.buf && P.buf.slow > 0 ? 0.45 : 1);
 const scoreMult = () => (P && P.buf && P.buf.mult > 0 ? 2 : 1);
 
 /* ---------------- Cristales de XP ---------------- */
@@ -118,6 +118,12 @@ function hurtPlayer() {
   P.xp = 0; P.inv = 2.2;
   burst(P.x, P.y, 18, 'cyan', 260, 0.6, 1.1);
   if (P.shield > 0) return;
+  if (P.revive) {
+    P.revive = false; P.shield = SHIP.armor + D.armor; P.inv = 3.2; flash = 0.7; vib(250);
+    NOVA = { x: P.x, y: P.y, r: 0, hit: [], bossHit: false }; P.reviveT = 1.3;
+    FT.push({ x: W / 2, y: H * 0.5, t: 0, s: '¡RENACER!', big: true, col: '#ff6a2b' }); SFX.bomb();
+    return;
+  }
   if (P.lives > 1) {
     P.lives--; explode(P.x, P.y, 2.5); flash = 0.6; vib(250);
     for (const b of eB) if (Math.hypot(b.x - P.x, b.y - P.y) < 220) b.dead = true;
@@ -146,6 +152,7 @@ function collectPU(u) {
     case 'S': if (P.shield < P.maxShield) P.shield++; else { score += 1000; label = '+1000'; } break;
     case 'B': if (P.bombs < 5) P.bombs++; else { score += 1000; label = '+1000'; } break;
     case 'E': P.barrier = 3; break;
+    case 'U': if (P.ult < 100 && !(P.ultT > 0)) gainUlt(50); else { score += 1000; label = '+1000'; } break;
     case 'V': if (P.lives < 5) P.lives++; else { score += 5000; label = '+5000'; } break;
     default: { const [k, dur] = BUFFS[u.t]; P.buf[k] = dur; }
   }
@@ -155,18 +162,21 @@ function updateBuffs(dt) {
   for (const k in P.buf) P.buf[k] = Math.max(0, P.buf[k] - dt);
   P.lvlFx = Math.max(0, P.lvlFx - dt);
   // drones escolta
-  if (P.buf.drone > 0 && P.alive) {
+  const own = SHIP.id === 'sentinel';
+  if ((P.buf.drone > 0 || own) && P.alive) {
     P.esc.forEach((e, i) => {
-      const s = i ? 1 : -1, tx = P.x + s * 52, ty = P.y + 12 + Math.sin(G.t * 4 + i * 2) * 6;
+      const s = i ? 1 : -1, oa = G.t * 2.4 + i * Math.PI;
+      const tx = own ? P.x + Math.cos(oa) * 58 : P.x + s * 52, ty = own ? P.y + Math.sin(oa) * 40 : P.y + 12 + Math.sin(G.t * 4 + i * 2) * 6;
       e.x += (tx - e.x) * Math.min(1, dt * 9); e.y += (ty - e.y) * Math.min(1, dt * 9);
       e.ft -= dt;
-      if (e.ft <= 0) { e.ft = 0.17; pB.push({ x: e.x, y: e.y - 14, vx: 0, vy: -1100, r: 6, dmg: 0.6 * lvlDmg(), rot: 0, spr: SPR.ebolt }); }
+      if (e.ft <= 0) { e.ft = own && P.buf.drone <= 0 ? 0.24 : 0.17; pB.push({ x: e.x, y: e.y - 14, vx: 0, vy: -1100, r: 6, dmg: 0.6 * lvlDmg(), rot: 0, spr: SPR.ebolt }); }
     });
   } else P.esc.forEach(e => { e.x = P.x; e.y = P.y; });
 }
 function drawEscorts() {
-  if (!P.alive || P.buf.drone <= 0) return;
-  const fade = P.buf.drone < 2 && Math.floor(G.t * 10) % 2;
+  const own = SHIP.id === 'sentinel';
+  if (!P.alive || (P.buf.drone <= 0 && !own)) return;
+  const fade = !own && P.buf.drone < 2 && Math.floor(G.t * 10) % 2;
   if (fade) return;
   for (const e of P.esc) {
     ctx.globalCompositeOperation = 'lighter'; drawSpr(GLOW.purple, e.x, e.y + 14, 0, 0.7); ctx.globalCompositeOperation = 'source-over';
@@ -180,7 +190,7 @@ function drawPlayerFx() {
     ctx.globalCompositeOperation = 'lighter';
     const gold = P.lvl >= MAX_LVL, k = (P.lvl - 3) / 7;
     ctx.globalAlpha = 0.25 + 0.35 * k + Math.sin(G.t * 5) * 0.1;
-    drawSpr(gold ? GLOW.amber : GLOW[{ falcon: 'cyan', rayo: 'yellow', titan: 'green', spectre: 'purple' }[SHIP.id]], P.x, P.y, 0, 2.6 + k * 1.4);
+    drawSpr(gold ? GLOW.amber : GLOW[SHIP.glow], P.x, P.y, 0, 2.6 + k * 1.4);
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
     if (P.lvl >= 7 && Math.random() < 0.5) PA.push({ x: P.x + rand(-40, 40), y: P.y + 30, vx: 0, vy: 120, life: 0.35, max: 0.35, s: 0.4, c: gold ? 'amber' : 'white' });
   }

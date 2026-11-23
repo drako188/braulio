@@ -1,16 +1,16 @@
 'use strict';
 /* ---------------- Naves y dificultad ---------------- */
 const SHIPS = [
-  { id: 'falcon', name: 'HALCÓN', role: 'Equilibrado', col: '#00e5ff', speed: 1, armor: 3, maxArmor: 5, rate: 0.1, dmg: 1, hit: 9, bombs: 2, weapon: 'plasma', flame: 'flame',
+  { id: 'falcon', name: 'HALCÓN', role: 'Equilibrado', col: '#00e5ff', glow: 'cyan', bars: [6, 6, 6, 5], speed: 1, armor: 3, maxArmor: 5, rate: 0.1, dmg: 1, hit: 9, bombs: 2, weapon: 'plasma', flame: 'flame',
     flames: [[-22, 38, 18, 40], [0, 42, 14, 30]], skill: 'Empieza en nivel 3',
     desc: 'Plasma en abanico. Rinde bien en todo, sin puntos débiles.' },
-  { id: 'rayo', name: 'RAYO', role: 'Interceptor', col: '#ffe14d', speed: 1.45, armor: 2, maxArmor: 4, rate: 0.065, dmg: 0.75, hit: 7, bombs: 1, weapon: 'needle', flame: 'flameY',
+  { id: 'rayo', name: 'RAYO', role: 'Interceptor', col: '#ffe14d', glow: 'yellow', bars: [10, 4, 10, 4], speed: 1.45, armor: 2, maxArmor: 4, rate: 0.065, dmg: 0.75, hit: 7, bombs: 1, weapon: 'needle', flame: 'flameY',
     flames: [[0, 40, 24, 56]], skill: 'Blanco pequeño · máxima cadencia',
     desc: 'La nave más veloz. Dispara agujas sin parar, pero aguanta pocos golpes.' },
-  { id: 'titan', name: 'TITÁN', role: 'Acorazado', col: '#39ff88', speed: 0.72, armor: 5, maxArmor: 7, rate: 0.17, dmg: 2, hit: 12, bombs: 3, weapon: 'cannon', flame: 'flameG',
+  { id: 'titan', name: 'TITÁN', role: 'Acorazado', col: '#39ff88', glow: 'green', bars: [5, 10, 3, 10], speed: 0.72, armor: 5, maxArmor: 7, rate: 0.17, dmg: 2, hit: 12, bombs: 3, weapon: 'cannon', flame: 'flameG',
     flames: [[-34, 40, 13, 28], [-12, 40, 13, 28], [12, 40, 13, 28], [34, 40, 13, 28]], skill: 'Autorreparación: +1 escudo cada 25 s',
     desc: 'Blindaje enorme y obuses pesados. Lento y fácil de alcanzar.' },
-  { id: 'spectre', name: 'ESPECTRO', role: 'Táctico', col: '#c86bff', speed: 1.1, armor: 3, maxArmor: 4, rate: 0.13, dmg: 0.8, hit: 8, bombs: 2, weapon: 'wave', flame: 'flameP',
+  { id: 'spectre', name: 'ESPECTRO', role: 'Táctico', col: '#c86bff', glow: 'purple', bars: [7, 6, 5, 4], speed: 1.1, armor: 3, maxArmor: 4, rate: 0.13, dmg: 0.8, hit: 8, bombs: 2, weapon: 'wave', flame: 'flameP',
     flames: [[-26, 26, 12, 26], [26, 26, 12, 26]], skill: 'Misiles desde el inicio · ondas perforantes',
     desc: 'Ondas que atraviesan enemigos y misiles teledirigidos. Cañón de poco daño.' }
 ];
@@ -45,6 +45,7 @@ function startGame() {
   P = { x: W / 2, y: H - 180, tx: W / 2, ty: H - 180, px: W / 2, r: SHIP.hit * (D.id === 'easy' ? 0.85 : 1), shield: sh, maxShield: SHIP.maxArmor + D.armor,
     wl: SHIP.id === 'falcon' ? 2 : 1, bombs: SHIP.bombs, inv: 2.5, fireT: 0, missT: 0.5, alive: true, bank: 0, deadT: 0, regen: 0 };
   initProgress();
+  P.ult = 0; P.ultT = 0; P.revive = SHIP.id === 'fenix'; STRIKES = []; NOVA = null; HOLE = null; BEAM = null;
   pB = []; eB = []; EN = []; PA = []; PU = []; RINGS = []; FT = []; LASERS = []; marks = [];
   score = 0; level = 1; stageT = 0; waveT = 1.5; boss = null; warnT = 0; newRecord = false;
   G.state = 'play'; G.phase = 'waves'; showBanner(); SFX.start(); setMusic('stage', 1);
@@ -82,6 +83,12 @@ function firePlayer() {
     case 'cannon': {
       const sets = [[-0.04, 0.04], [-0.1, 0, 0.1], [-0.16, -0.05, 0.05, 0.16], [-0.24, -0.12, 0, 0.12, 0.24], [-0.32, -0.19, -0.06, 0.06, 0.19, 0.32]][L - 1];
       for (const a of sets) add(a * 90, a, SPR.shell, 11, 900);
+      break;
+    }
+    case 'flame': fireFlame(x, y + 10, L, dm); break;
+    case 'twin': {
+      const n = [2, 2, 3, 4, 5][L - 1];
+      for (let i = 0; i < n; i++) { const k = i - (n - 1) / 2; add(k * 11, L >= 4 ? k * 0.04 : 0, SPR.pbolt, 8, 1150); }
       break;
     }
     case 'wave': {
@@ -264,7 +271,7 @@ function hitEnemy(e, d, x, y) {
   e.hp -= d; e.hit = 0.06;
   burst(x, y, 3, 'cyan', 140, 0.25, 0.5);
   if (e.hp <= 0 && !e.dead) {
-    e.dead = true; addScore(e.score, e.x, e.y);
+    e.dead = true; addScore(e.score, e.x, e.y); gainUlt(e.score / 60);
     const big = e.type === 'spinner' || e.type === 'cruiser' || e.type === 'bomber';
     explode(e.x, e.y, e.type === 'bomber' ? 3 : big ? 2.2 : e.type === 'tank' ? 1.4 : 1);
     if (e.ground) marks.push({ x: e.x, y: e.y, s: 0.9 });
@@ -303,6 +310,7 @@ function bossBoxes(b) {
   return out;
 }
 function damageBoss(d, x, y) {
+  gainUlt(d * 0.05);
   boss.hp -= d; boss.hit = 0.05; burst(x, y, 3, 'mag', 150, 0.25, 0.5); SFX.hit(x);
   if (boss.hp <= 0 && !boss.dying) { boss.dying = 0.001; SFX.bossDie(); vib(300); setMusic('victory', level + 1); eB.length = 0; LASERS = []; addScore(10000 * level, boss.kind === 'vroar' ? boss.head.x : boss.x, (boss.kind === 'vroar' ? boss.head.y : boss.y), true); }
 }
@@ -485,7 +493,7 @@ function update(dt) {
     const vx = (P.x - P.px) / Math.max(dt, 0.001); P.px = P.x;
     P.bank += (clamp(vx / 700, -1, 1) - P.bank) * Math.min(1, dt * 10);
     P.inv = Math.max(0, P.inv - dt);
-    P.fireT -= dt; if (P.fireT <= 0) { P.fireT = SHIP.rate * lvlRate() * (P.buf.hyper > 0 ? 0.5 : 1); firePlayer(); }
+    if (SHIP.weapon !== 'beam') { P.fireT -= dt; if (P.fireT <= 0) { P.fireT = SHIP.rate * lvlRate() * (P.buf.hyper > 0 ? 0.5 : 1) * (P.ultT > 0 && SHIP.id === 'rayo' ? 0.33 : 1); firePlayer(); } }
     const mr = missileRate();
     if (mr) { P.missT -= dt; if (P.missT <= 0) { P.missT = mr; fireMissiles(); } }
     if (SHIP.id === 'titan' && P.shield < P.maxShield) {
@@ -506,6 +514,7 @@ function update(dt) {
       b.sp = Math.min(820, b.sp + 900 * dt); b.vx = Math.cos(a) * b.sp; b.vy = Math.sin(a) * b.sp; b.rot = a + Math.PI / 2;
       if (Math.random() < 0.7) PA.push({ x: b.x, y: b.y, vx: rand(-20, 20), vy: rand(-20, 20), life: 0.25, max: 0.25, s: 0.45, c: 'mag' });
     }
+    if (b.life != null) { b.life -= dt; if (b.life <= 0) b.dead = true; }
     b.x += b.vx * dt; b.y += b.vy * dt;
   }
   const eDt = dt * slowK();
@@ -513,7 +522,7 @@ function update(dt) {
   if (boss) updateBoss(eDt);
   updateLasers(eDt);
   for (const b of eB) { b.x += b.vx * eDt; b.y += b.vy * eDt; }
-  updateBuffs(dt); updateXP(dt);
+  updateBuffs(dt); updateXP(dt); updateBeam(dt); updateUlt(dt);
   collisions();
   pB = pB.filter(b => !b.dead && b.y > -50 && b.y < H + 50 && b.x > -50 && b.x < W + 50);
   eB = eB.filter(b => !b.dead && b.x > -30 && b.x < W + 30 && b.y > -30 && b.y < H + 30);

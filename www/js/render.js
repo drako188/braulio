@@ -112,8 +112,12 @@ function drawWorld() {
   for (const e of EN) if (!e.ground && e.delay <= 0) drawEnemy(e);
   if (boss && boss.kind !== 'colossus') drawBoss(boss);
   ctx.globalCompositeOperation = 'lighter';
-  for (const b of pB) drawSpr(b.spr, b.x, b.y, b.rot);
+  for (const b of pB) {
+    if (b.grow) { const k = b.life / b.max; ctx.globalAlpha = Math.min(1, k + 0.25); drawSpr(b.spr, b.x, b.y, 0, 0.5 + (1 - k) * 1.7); ctx.globalAlpha = 1; }
+    else drawSpr(b.spr, b.x, b.y, b.rot);
+  }
   ctx.globalCompositeOperation = 'source-over';
+  drawBeam(); drawUlt();
   drawPlayerFx(); drawEscorts(); drawPlayer();
   // partículas: humo y restos, luego brillos
   for (const p of PA) {
@@ -202,7 +206,7 @@ function drawHUD() {
     ctx.fillStyle = i < P.shield ? '#39ff88' : 'rgba(57,255,136,0.12)'; ctx.fill();
     ctx.strokeStyle = 'rgba(57,255,136,0.7)'; ctx.lineWidth = 1.5; ctx.stroke();
   }
-  drawProgressHUD();
+  drawProgressHUD(); drawUltBtn();
   const bx = UI.bomb[0], by = H - 74;
   ctx.fillStyle = P.bombs > 0 ? 'rgba(255,120,30,0.18)' : 'rgba(80,80,80,0.2)'; ctx.beginPath(); ctx.arc(bx, by, 40, 0, TAU); ctx.fill();
   ctx.strokeStyle = P.bombs > 0 ? '#ff8a2b' : '#555'; ctx.lineWidth = 3; ctx.stroke();
@@ -259,19 +263,18 @@ function drawMenu() {
     drawIconBtn(p[0], p[1], 26, S.col);
     ctx.fillStyle = '#ffffff'; poly(ctx, [p[0] + dir * 8, p[1], p[0] - dir * 6, p[1] - 10, p[0] - dir * 6, p[1] + 10]); ctx.fill();
   }
-  ctx.globalCompositeOperation = 'lighter'; drawSpr(GLOW[{ falcon: 'cyan', rayo: 'yellow', titan: 'green', spectre: 'purple' }[S.id]], W / 2, H * 0.435, 0, 4); ctx.globalCompositeOperation = 'source-over';
+  ctx.globalCompositeOperation = 'lighter'; drawSpr(GLOW[S.glow], W / 2, H * 0.435, 0, 4); ctx.globalCompositeOperation = 'source-over';
   drawShip(S, W / 2, H * 0.435 + Math.sin(G.t * 2) * 5, 1.15, Math.sin(G.t * 1.3) * 0.15, false);
   txt(S.name, W / 2, H * 0.535, 28, '#ffffff', 'center', S.col, 900);
   txt(S.role.toUpperCase() + ' · ' + S.skill, W / 2, H * 0.535 + 26, 12, S.col, 'center', null, 700);
-  const stats = [['VELOCIDAD', S.speed / 1.45], ['BLINDAJE', S.armor / 5], ['CADENCIA', 0.065 / S.rate], ['DAÑO', S.dmg / 2]];
-  stats.forEach(([n, v], i) => {
-    const y = H * 0.6 + i * 26;
+  txt('ULTRA: ' + ULTS[S.id].name, W / 2, H * 0.535 + 46, 13, '#ffffff', 'center', S.col, 900);
+  const stats = ['VELOCIDAD', 'BLINDAJE', 'CADENCIA', 'DAÑO'];
+  stats.forEach((n, i) => {
+    const y = H * 0.625 + i * 25, v = S.bars[i];
     txt(n, 150, y, 12, '#9fb4cc', 'right', null, 800);
-    ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(166, y - 6, 260, 12);
-    const segs = Math.max(1, Math.round(clamp(v, 0, 1) * 10));
-    for (let k = 0; k < 10; k++) { ctx.fillStyle = k < segs ? S.col : 'rgba(255,255,255,0.06)'; ctx.fillRect(167 + k * 26, y - 5, 22, 10); }
+    for (let k = 0; k < 10; k++) { ctx.fillStyle = k < v ? S.col : 'rgba(255,255,255,0.07)'; ctx.fillRect(167 + k * 26, y - 5, 22, 10); }
   });
-  wrapText(S.desc, W / 2, H * 0.6 + 4 * 26 + 8, W - 80, 20, 14, '#c8d4e6');
+  wrapText(S.desc, W / 2, H * 0.625 + 4 * 25 + 6, W - 70, 19, 14, '#c8d4e6');
   const pulse = 0.85 + Math.sin(G.t * 4) * 0.15;
   ctx.globalAlpha = pulse; btn(L.start, 'DESPEGAR', S.col, true, 26); ctx.globalAlpha = 1;
   txt('RÉCORD ' + DIFFS[selDiff].name + '  ' + getHi(selDiff), W / 2, H * 0.94, 15, '#ffcf6a', 'center', null, 800);

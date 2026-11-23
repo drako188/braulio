@@ -24,6 +24,7 @@ y derriba oleadas de drones, interceptores, giro-drones y la gran **nave nodriza
 | **E** | Barrera que absorbe 3 impactos |
 | **H** | Hiper-cadencia: disparo ×2 (10 s) |
 | **M** | Imán: atrae cristales y power-ups (15 s) |
+| **ULT** | +50 % de carga del ULTRA |
 | **T** | Tiempo lento para enemigos y balas (6 s) |
 | **×2** | Puntos dobles (15 s) |
 | **1UP** | Vida extra (solo enemigos grandes y jefes) |
@@ -40,12 +41,18 @@ y derriba oleadas de drones, interceptores, giro-drones y la gran **nave nodriza
 Cada dificultad guarda su propio récord.
 
 ### Naves
-| Nave | Fortaleza | Debilidad | Habilidad |
-|---|---|---|---|
-| **Halcón** | Equilibrada, plasma en abanico | — | Empieza en nivel 3 |
-| **Rayo** | La más rápida, cadencia extrema, blanco pequeño | Solo 2 de escudo, poco daño por disparo | — |
-| **Titán** | 5 de escudo, obuses de mucho daño, 3 bombas | Lenta, blanco grande, dispara despacio | Recupera 1 escudo cada 25 s |
-| **Espectro** | Ondas que atraviesan enemigos | Cañón débil, escudo máx. 4 | Misiles teledirigidos desde el inicio |
+| Nave | Fortaleza | Debilidad | Habilidad | ULTRA |
+|---|---|---|---|---|
+| **Halcón** | Equilibrada, plasma en abanico | — | Empieza en nivel 3 | **Cañón Nova**: rayo gigante 3 s |
+| **Rayo** | La más rápida, cadencia extrema, blanco pequeño | 2 de escudo, poco daño | — | **Sobremarcha**: invencible, tiempo lento, disparo ×3 |
+| **Titán** | 5 de escudo, obuses pesados, 3 bombas | Lenta, blanco grande | +1 escudo cada 25 s | **Bombardeo orbital**: lluvia de ataques desde el cielo |
+| **Espectro** | Ondas que atraviesan enemigos | Cañón débil | Misiles desde el inicio | **Enjambre**: decenas de misiles teledirigidos |
+| **Fénix** | Lanzallamas perforante de mucho daño | Corto alcance | Renace una vez por partida | **Supernova**: anillo de fuego que barre la pantalla |
+| **Centinela** | Muy resistente, 2 drones propios | Poco daño propio | Drones siempre activos | **Muralla**: escudo que refleja las balas enemigas |
+| **Vórtice** | Láser continuo de daño altísimo | Solo 2 de escudo | — | **Agujero negro**: atrae y destruye enemigos y balas |
+
+**ULTRA:** la barra se carga destruyendo enemigos y dañando jefes (o con el power-up **ULT**). Cuando llega al 100 %
+el botón **ULTRA** brilla: tócalo para lanzar el ataque definitivo de tu nave.
 
 ### Enemigos
 Drones, cazas en picado, cazas interceptores laterales, kamikazes, minas (estallan en balas),
@@ -67,7 +74,7 @@ En **⚙ Ajustes** se puede activar/desactivar y regular la música y los efecto
 ## Estructura
 - `www/index.html` + `www/js/` — el juego (HTML5 Canvas, sin dependencias):
   `core` (pantalla y utilidades), `sprites`, `background`, `audio` (efectos y música),
-  `game` (lógica), `progress` (niveles, vidas y power-ups), `render` (dibujo y menús), `input` (controles y bucle).
+  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `render` (dibujo y menús), `input` (controles y bucle).
   Se puede abrir `www/index.html` directamente en un navegador para probarlo.
 - `android/` — app Android nativa (WebView a pantalla completa) que empaqueta `www/` como assets.
 - `.github/workflows/android.yml` — compila el APK automáticamente en GitHub Actions.
