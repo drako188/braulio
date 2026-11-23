@@ -14,6 +14,15 @@ y derriba oleadas de drones, interceptores, giro-drones y la gran **nave nodriza
 - En el **HANGAR** cada nave tiene 5 mejoras permanentes de 5 niveles (80 → 1000 monedas):
   **Blindaje** (+1 escudo máximo, +1 inicial cada 2 niveles), **Daño** (+6 %), **Cadencia** (+4 %), **Ultra** (+15 % de carga) e **Imán** (más alcance).
 
+### Modo historia
+Año 2187: una brecha se abre sobre Neo-Metrópolis y una flota biomecánica dirigida por **el Arconte** invade la Tierra.
+Eres **NOVA-1**, el último piloto del Escuadrón Aurora, guiado por la **comandante Iris Vale**, el ingeniero **Rook** y
+la IA de combate **ECO**.
+- Escena de introducción en la primera partida y una escena tras cada jefe, con retratos y texto animado (se pueden omitir).
+- El Arconte se burla por radio antes de cada jefe y tu equipo te da consejos en cada sector.
+- Final al destruir el Núcleo Omega, que da paso al Ciclo 2.
+- Se puede desactivar en **⚙ Ajustes → Historia**.
+
 ### Logros y misiones diarias
 - **34 logros** con recompensa en monedas: derrotar a cada uno de los 10 jefes, combos de 25/50/100, nivel máximo,
   vencer a un jefe sin recibir daño o sin bombas, 500/5.000 derribos, 50 ULTRA, 50 élites, 100 tanques,
@@ -118,7 +127,7 @@ En **⚙ Ajustes** se puede activar/desactivar y regular la música y los efecto
 ## Estructura
 - `www/index.html` + `www/js/` — el juego (HTML5 Canvas, sin dependencias):
   `core` (pantalla y utilidades), `sprites`, `background`, `audio` (efectos y música),
-  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `shipskins` (diseño de las naves), `bossskins` (diseño de los jefes), `bosses` (los 10 jefes), `chaos` (eventos, élites y combos), `themes` (escenarios y clima), `shop` (monedas y hangar), `achievements` (logros y misiones), `render` (dibujo y menús), `input` (controles y bucle).
+  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `shipskins` (diseño de las naves), `bossskins` (diseño de los jefes), `bosses` (los 10 jefes), `chaos` (eventos, élites y combos), `themes` (escenarios y clima), `shop` (monedas y hangar), `achievements` (logros y misiones), `story` (modo historia), `render` (dibujo y menús), `input` (controles y bucle).
   Se puede abrir `www/index.html` directamente en un navegador para probarlo.
 - `android/` — app Android nativa (WebView a pantalla completa) que empaqueta `www/` como assets.
 - `.github/workflows/android.yml` — compila el APK automáticamente en GitHub Actions.

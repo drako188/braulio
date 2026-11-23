@@ -46,7 +46,8 @@ function startGame() {
   score = 0; level = 1; stageT = 0; waveT = 1.5; boss = null; warnT = 0; newRecord = false;
   setTheme(0, true);
   COMBO.n = 0; COMBO.t = 0; COMBO.best = 0; eventT = rand(10, 14); lastEvent = -1; bgSpeed = 70;
-  G.state = 'play'; G.phase = 'waves'; showBanner(); SFX.start(); setMusic('stage', 1);
+  G.state = 'play'; G.phase = 'waves'; showBanner(); SFX.start(); setMusic('stage', 1); RADIO = null; tipDone = {};
+  if (!SAVE.introSeen) { SAVE.introSeen = 1; saveData(true); playScene(STORY.intro); }
 }
 function showBanner() { banner = { t: 0, a: 'SECTOR ' + level, b: SECTORS[(level - 1) % SECTORS.length] }; setTheme((level - 1) % THEMES.length); ACH.sector(level); }
 const aim = (x, y) => Math.atan2(P.y - y, P.x - x);
@@ -164,7 +165,7 @@ const WAVES = [
 function spawner(dt) {
   const bossAt = 60 + level * 5;
   if (G.phase === 'waves') {
-    if (stageT > bossAt) { G.phase = 'warn'; warnT = 4.6; SFX.warn(); setMusic('warn'); return; }
+    if (stageT > bossAt) { G.phase = 'warn'; warnT = 4.6; SFX.warn(); setMusic('warn'); radio('arconte', TAUNTS[(level - 1) % TAUNTS.length]); return; }
     if (stageT > bossAt - 4) return;
     waveT -= dt;
     if (waveT <= 0 && EN.length < 24) {
@@ -429,9 +430,10 @@ function update(dt) {
   G.t += dt;
   const inMenu = G.state === 'menu' || G.state === 'hangar' || G.state === 'achievements' || (G.state === 'settings' && (G.prev === 'menu' || G.prev === 'hangar' || G.prev === 'achievements'));
   if (inMenu) setMusic('menu'); else if (G.state === 'over') setMusic('over');
-  duckMusic(G.state === 'paused' || (G.state === 'settings' && !inMenu));
+  duckMusic(G.state === 'paused' || G.state === 'story' || (G.state === 'settings' && !inMenu));
   if (G.state !== 'play') laserHum(false);
   else if (G.phase === 'waves') MUS.intensity = stageT < 20 ? 0 : stageT < 45 ? 1 : 2;
+  if (G.state === 'story') { SCENE.t += dt; updateBG(dt * 0.4); return; }
   if (G.state === 'paused' || G.state === 'settings') { if (inMenu) updateBG(dt); return; }
   updateBG(dt);
   shake = Math.max(0, shake - dt * 30); flash = Math.max(0, flash - dt * 2.2);
@@ -480,7 +482,7 @@ function update(dt) {
   if (boss) updateBoss(eDt);
   updateLasers(eDt);
   for (const b of eB) { b.x += b.vx * eDt; b.y += b.vy * eDt; }
-  updateBuffs(dt); updateXP(dt); updateBeam(dt); updateUlt(dt); updateChaos(dt);
+  updateBuffs(dt); updateXP(dt); updateBeam(dt); updateUlt(dt); updateChaos(dt); updateRadio(dt);
   collisions();
   pB = pB.filter(b => !b.dead && b.y > -50 && b.y < H + 50 && b.x > -50 && b.x < W + 50);
   eB = eB.filter(b => !b.dead && b.x > -30 && b.x < W + 30 && b.y > -30 && b.y < H + 30);

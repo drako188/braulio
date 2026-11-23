@@ -7,8 +7,8 @@ const near = (x, y, [bx, by], r) => (x - bx) ** 2 + (y - by) ** 2 < r * r;
 const inR = (x, y, r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
 function changeShip(d) { selShip = (selShip + d + SHIPS.length) % SHIPS.length; saveSel(); SFX.ui(); }
 function settingsTap(x, y) {
-  const L = settingsLayout(), keys2 = [['music', 'musicVol'], ['sfx', 'sfxVol'], ['vib', null]];
-  for (let i = 0; i < 3; i++) {
+  const L = settingsLayout(), keys2 = [['music', 'musicVol'], ['sfx', 'sfxVol'], ['vib', null], ['story', null]];
+  for (let i = 0; i < 4; i++) {
     const r = L.rows[i], [k, vk] = keys2[i];
     if (inR(x, y, r.tog)) { SET[k] = !SET[k]; saveSet(); if (k === 'vib' && SET.vib) vib(60); SFX.ui(); return; }
     if (vk && inR(x, y, r.minus)) { SET[vk] = Math.max(0, Math.round(SET[vk] * 10 - 1) / 10); saveSet(); SFX.ui(); return; }
@@ -27,6 +27,7 @@ function menuTap(x, y) {
 cv.addEventListener('pointerdown', e => {
   e.preventDefault(); initAudio();
   const [x, y] = toGame(e);
+  if (G.state === 'story') { storyTap(x, y); return; }
   if (G.state === 'settings') { settingsTap(x, y); return; }
   if (near(x, y, UI.mute, 30) && G.state !== 'over') { G.prev = G.state === 'play' ? 'paused' : G.state; G.state = 'settings'; dragId = null; SFX.ui(); return; }
   if (G.state === 'hangar') { hangarTap(x, y); return; }
@@ -51,6 +52,7 @@ const endDrag = e => { achDragY = null; if (e.pointerId === dragId) dragId = nul
 cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
 addEventListener('keydown', e => {
   keys[e.code] = true; initAudio();
+  if (G.state === 'story') { if (e.code === 'Space' || e.code === 'Enter') advanceScene(); if (e.code === 'Escape') endScene(); return; }
   if (G.state === 'menu') {
     if (e.code === 'ArrowLeft') changeShip(-1);
     if (e.code === 'ArrowRight') changeShip(1);
@@ -69,6 +71,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && G.s
 window.onAppPause = () => { if (G.state === 'play') G.state = 'paused'; };
 window.onBack = () => {
   if (G.state === 'play') { G.state = 'paused'; return true; }
+  if (G.state === 'story') { endScene(); return true; }
   if (G.state === 'settings') { G.state = G.prev || 'menu'; return true; }
   if (G.state === 'hangar' || G.state === 'achievements') { G.state = 'menu'; return true; }
   if (G.state === 'paused' || G.state === 'over') { G.state = 'menu'; return true; }

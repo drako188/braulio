@@ -161,18 +161,18 @@ function drawGear() {
   if (!SET.music && !SET.sfx) { ctx.strokeStyle = '#ff3355'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(x - 13, y + 13); ctx.lineTo(x + 13, y - 13); ctx.stroke(); }
 }
 function settingsLayout() {
-  const y0 = H * 0.3, rows = [];
-  for (let i = 0; i < 3; i++) {
-    const y = y0 + i * 96;
+  const y0 = H * 0.27, rows = [];
+  for (let i = 0; i < 4; i++) {
+    const y = y0 + i * 90;
     rows.push({ y, tog: { x: W - 140, y: y - 22, w: 104, h: 44 }, minus: { x: 36, y: y + 30, w: 44, h: 40 }, plus: { x: W - 80, y: y + 30, w: 44, h: 40 } });
   }
-  return { rows, back: { x: W / 2 - 130, y: y0 + 3 * 96 + 30, w: 260, h: 56 } };
+  return { rows, back: { x: W / 2 - 130, y: y0 + 4 * 90 + 10, w: 260, h: 56 } };
 }
 function drawSettings() {
   ctx.fillStyle = 'rgba(2,4,12,0.93)'; ctx.fillRect(0, 0, W, H);
   txt('AJUSTES', W / 2, H * 0.17, 44, '#ffffff', 'center', '#00e5ff', 900);
   const L = settingsLayout();
-  const items = [['MÚSICA', 'music', 'musicVol', '#ff2bd6'], ['EFECTOS', 'sfx', 'sfxVol', '#00e5ff'], ['VIBRACIÓN', 'vib', null, '#ffb800']];
+  const items = [['MÚSICA', 'music', 'musicVol', '#ff2bd6'], ['EFECTOS', 'sfx', 'sfxVol', '#00e5ff'], ['VIBRACIÓN', 'vib', null, '#ffb800'], ['HISTORIA', 'story', null, '#39ff88']];
   items.forEach(([name, key, vk, col], i) => {
     const r = L.rows[i];
     txt(name, 40, r.y, 22, '#ffffff', 'left', null, 900);
@@ -208,7 +208,7 @@ function drawHUD() {
     ctx.fillStyle = i < P.shield ? '#39ff88' : 'rgba(57,255,136,0.12)'; ctx.fill();
     ctx.strokeStyle = 'rgba(57,255,136,0.7)'; ctx.lineWidth = 1.5; ctx.stroke();
   }
-  drawProgressHUD(); drawUltBtn(); drawCombo(); drawAmbushWarn();
+  drawProgressHUD(); drawUltBtn(); drawCombo(); drawAmbushWarn(); drawRadio();
   const bx = UI.bomb[0], by = H - 74;
   ctx.fillStyle = P.bombs > 0 ? 'rgba(255,120,30,0.18)' : 'rgba(80,80,80,0.2)'; ctx.beginPath(); ctx.arc(bx, by, 40, 0, TAU); ctx.fill();
   ctx.strokeStyle = P.bombs > 0 ? '#ff8a2b' : '#555'; ctx.lineWidth = 3; ctx.stroke();
@@ -309,6 +309,7 @@ function render() {
   else {
     drawHUD();
     if (under === 'over') drawOver();
+    if (under === 'story') drawStory();
     if (under === 'paused') {
       ctx.fillStyle = 'rgba(2,4,12,0.6)'; ctx.fillRect(0, 0, W, H);
       txt('PAUSA', W / 2, H * 0.38, 60, '#ffffff', 'center', '#00e5ff', 900);
