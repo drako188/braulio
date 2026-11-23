@@ -43,10 +43,11 @@ function startGame() {
   P.ult = 0; P.ultT = 0; P.revive = SHIP.id === 'fenix'; STRIKES = []; NOVA = null; HOLE = null; BEAM = null;
   pB = []; eB = []; EN = []; PA = []; PU = []; RINGS = []; FT = []; LASERS = []; marks = [];
   score = 0; level = 1; stageT = 0; waveT = 1.5; boss = null; warnT = 0; newRecord = false;
+  setTheme(0, true);
   COMBO.n = 0; COMBO.t = 0; COMBO.best = 0; eventT = rand(10, 14); lastEvent = -1; bgSpeed = 70;
   G.state = 'play'; G.phase = 'waves'; showBanner(); SFX.start(); setMusic('stage', 1);
 }
-function showBanner() { banner = { t: 0, a: 'SECTOR ' + level, b: SECTORS[(level - 1) % SECTORS.length] }; }
+function showBanner() { banner = { t: 0, a: 'SECTOR ' + level, b: SECTORS[(level - 1) % SECTORS.length] }; setTheme((level - 1) % THEMES.length); }
 const aim = (x, y) => Math.atan2(P.y - y, P.x - x);
 const bspd = () => Math.min(410, (175 + level * 18) * D.bullet);
 const cd = s => s / D.fire;

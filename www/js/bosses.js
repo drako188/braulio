@@ -610,7 +610,7 @@ function spawnBoss() {
   boss = { idx, kind: Df.kind, name: Df.name, x: W / 2, y: -170, hp, maxhp: hp, t: 0, hit: 0, enter: true, a1: 1, a2: 0.5, a3: 4, spin: 0, dying: 0,
     ta: [Math.PI / 2, Math.PI / 2, Math.PI / 2, Math.PI / 2], rage: false };
   Df.init(boss);
-  G.phase = 'boss'; setMusic('boss', idx);
+  G.phase = 'boss'; setMusic('boss', idx); prepareTheme(level);
 }
 function bossBoxes(b) { return bossDef(b).boxes(b); }
 function checkBossDeath() {

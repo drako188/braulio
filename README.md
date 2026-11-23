@@ -29,6 +29,13 @@ y derriba oleadas de drones, interceptores, giro-drones y la gran **nave nodriza
 | **×2** | Puntos dobles (15 s) |
 | **1UP** | Vida extra (solo enemigos grandes y jefes) |
 
+### Escenarios
+Cada sector tiene su propio escenario, clima y partículas: 1 Neo-Metrópolis (ciudad neón), 2 Órbita baja (estación espacial
+y estrellas), 3 Zona cuarentena (ruinas y ceniza), 4 Desierto de cristal (dunas y tormentas de arena), 5 Distrito industrial
+(metal fundido y chispas), 6 Cavernas profundas (hongos luminosos y esporas), 7 Océano tormenta (plataformas, lluvia y
+relámpagos), 8 Pantano tóxico (manglares y luciérnagas), 9 Tundra fantasma (lagos helados y nieve) y 10 Sector Omega
+(circuitos alienígenas). El cambio de escenario se cubre con un banco de niebla.
+
 ### Ritmo e imprevistos
 - Cuanto más avanza el sector, más rápido llegan las oleadas (a veces dos a la vez) y más rápido se desplaza la ciudad.
 - **Eventos aleatorios** cada 12–19 s: emboscada por detrás (avisada con flechas rojas abajo), escuadrón élite,
@@ -97,7 +104,7 @@ En **⚙ Ajustes** se puede activar/desactivar y regular la música y los efecto
 ## Estructura
 - `www/index.html` + `www/js/` — el juego (HTML5 Canvas, sin dependencias):
   `core` (pantalla y utilidades), `sprites`, `background`, `audio` (efectos y música),
-  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `bosses` (los 10 jefes), `chaos` (eventos, élites y combos), `render` (dibujo y menús), `input` (controles y bucle).
+  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `bosses` (los 10 jefes), `chaos` (eventos, élites y combos), `themes` (escenarios y clima), `render` (dibujo y menús), `input` (controles y bucle).
   Se puede abrir `www/index.html` directamente en un navegador para probarlo.
 - `android/` — app Android nativa (WebView a pantalla completa) que empaqueta `www/` como assets.
 - `.github/workflows/android.yml` — compila el APK automáticamente en GitHub Actions.

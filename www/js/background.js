@@ -1,6 +1,6 @@
 'use strict';
 /* ---------------- Background (ciudad neón procedural) ---------------- */
-const CH = 640, BG_SS = 2;
+const CH = 640, BG_SS = 1.6;
 const ROADV = [[112, 48], [380, 48]];
 var CUR_BEACONS = null;
 function lightDot(g, x, y, c, r = 6) {
@@ -84,7 +84,7 @@ function makeChunk() {
   c.beacons = CUR_BEACONS; CUR_BEACONS = null;
   return c;
 }
-const CHUNKS = [makeChunk(), makeChunk(), makeChunk(), makeChunk()];
+let CHUNKS = [makeChunk(), makeChunk(), makeChunk(), makeChunk()];
 const BEACON_GLOW = { '#ff3355': 'red', '#00e5ff': 'cyan', '#ffffff': 'white', '#ff2bd6': 'mag', '#7c4dff': 'purple', '#39ff88': 'green', '#ffb800': 'amber' };
 let tiles = [], cars = [], clouds = [], lights = [], marks = [], bgSpeed = 70;
 function updateBG(dt) {
@@ -92,8 +92,8 @@ function updateBG(dt) {
   for (const t of tiles) t.y += dy;
   tiles = tiles.filter(t => t.y < H);
   if (!tiles.length) tiles.push({ img: pick(CHUNKS), y: H - CH });
-  while (tiles[tiles.length - 1].y > 0) { const top = tiles[tiles.length - 1]; tiles.push({ img: pick(CHUNKS), y: top.y - CH }); }
-  if (cars.length < 16 && Math.random() < dt * 4) {
+  while (tiles[tiles.length - 1].y > 0) { const top = tiles[tiles.length - 1]; tiles.push({ img: pick(CHUNKS), y: top.y - CH, seam: seamPending }); seamPending = false; }
+  if (THEMES[THEME].cars && cars.length < 16 && Math.random() < dt * 4) {
     const [rx, rw] = pick(ROADV), down = Math.random() < 0.5;
     cars.push({ x: rx + (down ? 14 : rw - 14), y: down ? -20 : H + 20, v: down ? rand(90, 170) : -rand(110, 190) });
   }
@@ -102,14 +102,16 @@ function updateBG(dt) {
   if (clouds.length < 3 && Math.random() < dt * 0.25) clouds.push({ x: rand(-60, W + 60), y: -120, s: rand(0.9, 1.6) });
   for (const c of clouds) c.y += bgSpeed * 2.6 * dt;
   clouds = clouds.filter(c => c.y < H + 160);
-  if (lights.length < 3 && Math.random() < dt * 0.35) lights.push({ x: rand(30, W - 30), y: -10, a0: rand(-0.5, 0.5), ph: rand(0, TAU), sp: rand(0.4, 0.9) });
+  if (THEMES[THEME].lights && lights.length < 3 && Math.random() < dt * 0.35) lights.push({ x: rand(30, W - 30), y: -10, a0: rand(-0.5, 0.5), ph: rand(0, TAU), sp: rand(0.4, 0.9) });
   for (const l of lights) l.y += dy;
   lights = lights.filter(l => l.y < H + 320);
   for (const m of marks) m.y += dy;
   marks = marks.filter(m => m.y < H + 60);
+  updateAmbient(dt);
 }
 function drawBG() {
   for (const t of tiles) ctx.drawImage(t.img, 0, Math.floor(t.y), W, CH + 1);
+  drawSeams();
   for (const m of marks) drawSpr(SPR.scorch, m.x, m.y, 0, m.s);
   ctx.globalCompositeOperation = 'lighter';
   for (const t of tiles) for (const b of t.img.beacons) {
@@ -131,7 +133,7 @@ function drawBG() {
   ctx.globalCompositeOperation = 'source-over';
   for (const c of cars) { ctx.fillStyle = '#1e2438'; ctx.fillRect(c.x - 4, c.y - 8, 8, 16); }
 }
-function drawClouds() { for (const c of clouds) drawSpr(SPR.cloud, c.x, c.y, 0, c.s); }
+function drawClouds() { const cs = themeCloud(); for (const c of clouds) drawSpr(cs, c.x, c.y, 0, c.s); drawAmbient(); }
 var VIG = null;
 function makeVig() {
   VIG = document.createElement('canvas'); VIG.width = W / 2; VIG.height = Math.round(H / 2);

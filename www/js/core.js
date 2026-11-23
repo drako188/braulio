@@ -22,7 +22,7 @@ const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const FONT = 'system-ui, Roboto, "Segoe UI", sans-serif';
 const NEON = ['#00e5ff', '#ff2bd6', '#7c4dff', '#39ff88', '#ffb800'];
-const SECTORS = ['NEO-METRÓPOLIS', 'DISTRITO ORBITAL', 'ZONA CUARENTENA', 'CIUDAD COLMENA', 'DISTRITO INDUSTRIAL', 'NIDO SUBTERRÁNEO', 'TORRES DE TORMENTA', 'PANTANO TÓXICO', 'ZONA FANTASMA', 'SECTOR OMEGA'];
+const SECTORS = ['NEO-METRÓPOLIS', 'ÓRBITA BAJA', 'ZONA CUARENTENA', 'DESIERTO DE CRISTAL', 'DISTRITO INDUSTRIAL', 'CAVERNAS PROFUNDAS', 'OCÉANO TORMENTA', 'PANTANO TÓXICO', 'TUNDRA FANTASMA', 'SECTOR OMEGA'];
 
 /* ---------------- Sprite helpers ---------------- */
 const SS = 2;
