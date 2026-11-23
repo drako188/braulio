@@ -39,9 +39,17 @@ giro-drones, cruceros, bombarderos pesados y **tanques terrestres** con torreta 
 
 Al bajar del 50 % de vida, cada jefe entra en modo furia.
 
+### Sonido y música
+Música synthwave generada en tiempo real: tema de menú, tema de combate que se intensifica con el sector,
+alerta, un tema propio para cada jefe, fanfarria de victoria y tema de fin de partida.
+Cada arma, disparo enemigo, láser y explosión tiene su propio sonido (con efecto estéreo).
+En **⚙ Ajustes** se puede activar/desactivar y regular la música y los efectos, y la vibración.
+
 ## Estructura
-- `www/index.html` — el juego completo (HTML5 Canvas, sin dependencias, sonido sintetizado).
-  Se puede abrir directamente en un navegador para probarlo.
+- `www/index.html` + `www/js/` — el juego (HTML5 Canvas, sin dependencias):
+  `core` (pantalla y utilidades), `sprites`, `background`, `audio` (efectos y música),
+  `game` (lógica), `render` (dibujo y menús), `input` (controles y bucle).
+  Se puede abrir `www/index.html` directamente en un navegador para probarlo.
 - `android/` — app Android nativa (WebView a pantalla completa) que empaqueta `www/` como assets.
 - `.github/workflows/android.yml` — compila el APK automáticamente en GitHub Actions.
 
