@@ -121,7 +121,7 @@ function drawBeam() {
 /* ---------------- Carga del ULTRA ---------------- */
 function gainUlt(v) {
   if (!P || P.ultT > 0 || P.ult >= 100) return;
-  P.ult = Math.min(100, P.ult + v);
+  P.ult = Math.min(100, P.ult + v * (1 + 0.15 * upg('ult')));
   if (P.ult >= 100) { FT.push({ x: W / 2, y: H * 0.62, t: 0, s: '¡ULTRA LISTO!', big: true, col: SHIP.col }); SFX.ultReady(); }
 }
 function hurtEnemyQuiet(e, d) { if (e.dead || e.delay > 0) return; e.hp -= d; e.hit = 0.05; if (e.hp <= 0) hitEnemy(e, 0, e.x, e.y); }

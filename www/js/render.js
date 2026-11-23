@@ -197,6 +197,7 @@ function drawHUD() {
   txt('RÉCORD ' + Math.max(hi, score), 20, 62, 13, '#8fb8d8', 'left', null, 700);
   txt('S-' + level, W - 150, 32, 15, '#ff7ae8', 'center', null, 800);
   txt(D.name, W - 150, 52, 10, D.col, 'center', null, 800);
+  txt(coinLabel(runCoins), W - 150, 70, 12, '#ffd23f', 'center', null, 900);
   drawGear();
   const [px, py] = UI.pause; drawIconBtn(px, py, 22, 'rgba(0,229,255,0.7)');
   ctx.fillStyle = '#cfefff'; ctx.fillRect(px - 7, py - 9, 5, 18); ctx.fillRect(px + 2, py - 9, 5, 18);
@@ -272,8 +273,7 @@ function drawMenu() {
     for (let k = 0; k < 10; k++) { ctx.fillStyle = k < v ? S.col : 'rgba(255,255,255,0.07)'; ctx.fillRect(167 + k * 26, y - 5, 22, 10); }
   });
   wrapText(S.desc, W / 2, H * 0.625 + 4 * 25 + 6, W - 70, 19, 14, '#c8d4e6');
-  const pulse = 0.85 + Math.sin(G.t * 4) * 0.15;
-  ctx.globalAlpha = pulse; btn(L.start, 'DESPEGAR', S.col, true, 26); ctx.globalAlpha = 1;
+  drawMenuButtons();
   txt('RÉCORD ' + DIFFS[selDiff].name + '  ' + getHi(selDiff), W / 2, H * 0.94, 15, '#ffcf6a', 'center', null, 800);
   drawGear();
 }
@@ -288,6 +288,7 @@ function drawOver() {
   txt(String(score), W / 2, H * 0.5 + 36, 46, '#ffffff', 'center', '#00e5ff', 900);
   txt(newRecord ? '¡NUEVO RÉCORD!' : 'RÉCORD  ' + hi, W / 2, H * 0.5 + 84, 20, '#ffcf6a', 'center', newRecord ? '#ffb800' : null, 800);
   txt(SHIP.name + ' · ' + D.name + ' · Sector ' + level, W / 2, H * 0.5 + 116, 16, '#b8c8e0', 'center', null, 600);
+  txt('+' + coinLabel(runCoins) + ' monedas  ·  total ' + coinLabel(SAVE.coins), W / 2, H * 0.5 + 146, 16, '#ffd23f', 'center', null, 800);
   if (overT > 1 && Math.floor(G.t * 2) % 2 === 0) txt('TOCA PARA CONTINUAR', W / 2, H * 0.78, 24, '#ffffff', 'center', '#00e5ff', 900);
   ctx.globalAlpha = 1;
 }
@@ -297,12 +298,13 @@ function render() {
   const sx = shake > 0 ? rand(-shake, shake) * 0.5 : 0, sy = shake > 0 ? rand(-shake, shake) * 0.5 : 0;
   ctx.setTransform(k, 0, 0, k, sx * k, sy * k);
   drawBG();
-  const under = G.state === 'settings' ? G.prev : G.state;
-  if (under === 'menu') drawClouds(); else drawWorld();
+  const under = G.state === 'settings' ? G.prev : G.state, menuLike = under === 'menu' || under === 'hangar';
+  if (menuLike) drawClouds(); else drawWorld();
   ctx.setTransform(k, 0, 0, k, 0, 0);
   if (VIG) ctx.drawImage(VIG, 0, 0, W, H);
   if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * 0.55})`; ctx.fillRect(0, 0, W, H); }
   if (under === 'menu') drawMenu();
+  else if (under === 'hangar') drawHangar();
   else {
     drawHUD();
     if (under === 'over') drawOver();

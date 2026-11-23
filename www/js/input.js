@@ -21,7 +21,7 @@ function menuTap(x, y) {
   for (let i = 0; i < 3; i++) if (inR(x, y, L.diff[i])) { selDiff = i; saveSel(); SFX.ui(); return; }
   if (near(x, y, L.left, 40)) return changeShip(-1);
   if (near(x, y, L.right, 40)) return changeShip(1);
-  if (inR(x, y, L.start)) return startGame();
+  if (menuButtonsTap(x, y)) return;
   if (inR(x, y, L.ship)) return changeShip(1);
 }
 cv.addEventListener('pointerdown', e => {
@@ -29,6 +29,7 @@ cv.addEventListener('pointerdown', e => {
   const [x, y] = toGame(e);
   if (G.state === 'settings') { settingsTap(x, y); return; }
   if (near(x, y, UI.mute, 30) && G.state !== 'over') { G.prev = G.state === 'play' ? 'paused' : G.state; G.state = 'settings'; dragId = null; SFX.ui(); return; }
+  if (G.state === 'hangar') { hangarTap(x, y); return; }
   if (G.state === 'menu') { menuTap(x, y); return; }
   if (G.state === 'over') { if (overT > 1) G.state = 'menu'; return; }
   if (G.state === 'paused') { if (inR(x, y, pauseLayout().menu)) G.state = 'menu'; else G.state = 'play'; return; }
@@ -52,7 +53,7 @@ addEventListener('keydown', e => {
     if (e.code === 'ArrowRight') changeShip(1);
     if (e.code === 'ArrowUp') { selDiff = Math.max(0, selDiff - 1); saveSel(); }
     if (e.code === 'ArrowDown') { selDiff = Math.min(2, selDiff + 1); saveSel(); }
-    if (e.code === 'Enter' || e.code === 'Space') startGame();
+    if (e.code === 'Enter' || e.code === 'Space') { if (isUnlocked(SHIPS[selShip].id)) startGame(); else buyShip(SHIPS[selShip].id); }
     return;
   }
   if (e.code === 'Space' || e.code === 'KeyX') useBomb();
@@ -66,6 +67,7 @@ window.onAppPause = () => { if (G.state === 'play') G.state = 'paused'; };
 window.onBack = () => {
   if (G.state === 'play') { G.state = 'paused'; return true; }
   if (G.state === 'settings') { G.state = G.prev || 'menu'; return true; }
+  if (G.state === 'hangar') { G.state = 'menu'; return true; }
   if (G.state === 'paused' || G.state === 'over') { G.state = 'menu'; return true; }
   return false;
 };

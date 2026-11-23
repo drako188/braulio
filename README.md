@@ -8,6 +8,12 @@ y derriba oleadas de drones, interceptores, giro-drones y la gran **nave nodriza
 - **Arrastra** el dedo para mover la nave (disparo automático).
 - **Botón naranja (bomba):** borra todas las balas enemigas y daña a todos los enemigos.
 
+### Monedas, hangar y naves desbloqueables
+- Los enemigos sueltan **monedas** (los élite y los jefes muchas más). Se guardan entre partidas; en Difícil valen ×1,5.
+- Empiezas con **Halcón, Rayo y Titán**. Las demás se desbloquean con monedas: Espectro 600, Centinela 900, Fénix 1400, Vórtice 2000.
+- En el **HANGAR** cada nave tiene 5 mejoras permanentes de 5 niveles (80 → 1000 monedas):
+  **Blindaje** (+1 escudo máximo, +1 inicial cada 2 niveles), **Daño** (+6 %), **Cadencia** (+4 %), **Ultra** (+15 % de carga) e **Imán** (más alcance).
+
 ### Niveles, escudo y vidas
 - Los enemigos sueltan **cristales de XP** (verdes = 1, morados = 5). Al llenar la barra, la nave **sube de nivel (1–10)**:
   más disparos, +7 % de daño y +2,5 % de cadencia por nivel. Desde nivel 4 la nave brilla y en nivel 10 su aura es dorada.
@@ -61,7 +67,7 @@ Cada dificultad guarda su propio récord.
 | Nave | Fortaleza | Debilidad | Habilidad | ULTRA |
 |---|---|---|---|---|
 | **Halcón** | Equilibrada, plasma en abanico | — | Empieza en nivel 3 | **Cañón Nova**: rayo gigante 3 s |
-| **Rayo** | La más rápida, cadencia extrema, blanco pequeño | 2 de escudo, poco daño | — | **Sobremarcha**: invencible, tiempo lento, disparo ×3 |
+| **Rayo** (nave alienígena verde) | La más rápida, cadencia extrema, blanco pequeño | 2 de escudo, poco daño | — | **Sobremarcha**: invencible, tiempo lento, disparo ×3 |
 | **Titán** | 5 de escudo, obuses pesados, 3 bombas | Lenta, blanco grande | +1 escudo cada 25 s | **Bombardeo orbital**: lluvia de ataques desde el cielo |
 | **Espectro** | Ondas que atraviesan enemigos | Cañón débil | Misiles desde el inicio | **Enjambre**: decenas de misiles teledirigidos |
 | **Fénix** | Lanzallamas perforante de mucho daño | Corto alcance | Renace una vez por partida | **Supernova**: anillo de fuego que barre la pantalla |
@@ -104,7 +110,7 @@ En **⚙ Ajustes** se puede activar/desactivar y regular la música y los efecto
 ## Estructura
 - `www/index.html` + `www/js/` — el juego (HTML5 Canvas, sin dependencias):
   `core` (pantalla y utilidades), `sprites`, `background`, `audio` (efectos y música),
-  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `bosses` (los 10 jefes), `chaos` (eventos, élites y combos), `themes` (escenarios y clima), `render` (dibujo y menús), `input` (controles y bucle).
+  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `shipskins` (diseño de las naves), `bosses` (los 10 jefes), `chaos` (eventos, élites y combos), `themes` (escenarios y clima), `shop` (monedas y hangar), `render` (dibujo y menús), `input` (controles y bucle).
   Se puede abrir `www/index.html` directamente en un navegador para probarlo.
 - `android/` — app Android nativa (WebView a pantalla completa) que empaqueta `www/` como assets.
 - `.github/workflows/android.yml` — compila el APK automáticamente en GitHub Actions.

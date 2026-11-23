@@ -5,8 +5,8 @@
 const MAX_LVL = 10;
 const xpNeed = l => 6 + l * 4;                      // XP para pasar del nivel l al l+1
 const minLvl = () => (SHIP.id === 'falcon' ? 3 : 1);
-const lvlDmg = () => 1 + (P.lvl - 1) * 0.07;        // +7 % de daño por nivel
-const lvlRate = () => 1 - (P.lvl - 1) * 0.025;      // disparo un 2,5 % más rápido por nivel
+const lvlDmg = () => (1 + (P.lvl - 1) * 0.07) * (1 + 0.06 * upg('dmg'));        // +7 % de daño por nivel
+const lvlRate = () => (1 - (P.lvl - 1) * 0.025) * (1 - 0.04 * upg('rate'));      // disparo un 2,5 % más rápido por nivel
 function syncWeapon() { P.wl = Math.min(5, Math.ceil(P.lvl / 2)); }
 const START_LIVES = { easy: 4, normal: 3, hard: 2 };
 
@@ -82,13 +82,13 @@ function levelUp() {
   SFX.levelUp();
 }
 function updateXP(dt) {
-  const mag = P.alive && P.buf.magnet > 0, rad = mag ? 2000 : 95, damp = Math.pow(0.08, dt);
+  const mag = P.alive && P.buf.magnet > 0, rad = mag ? 2000 : magRadius(), damp = Math.pow(0.08, dt);
   for (const c of XC) {
     c.t += dt; c.vx *= damp; c.vy *= damp;
     if (P.alive) {
       const dx = P.x - c.x, dy = P.y - c.y, d = Math.hypot(dx, dy);
       if (d < rad && c.t > 0.25) { const sp = mag ? 700 : 520; c.x += dx / d * sp * dt; c.y += dy / d * sp * dt; }
-      if (d < 30) { c.dead = true; gainXP(c.v); SFX.xp(); continue; }
+      if (d < 30) { c.dead = true; if (c.coin) { addCoins(c.v); SFX.coin(); } else { gainXP(c.v); SFX.xp(); } continue; }
     }
     c.x += c.vx * dt; c.y += (c.vy + bgSpeed * 0.8) * dt;
     if (c.t > 9 || c.y > H + 30) c.dead = true;
@@ -97,11 +97,12 @@ function updateXP(dt) {
 }
 function drawXP() {
   ctx.globalCompositeOperation = 'lighter';
-  for (const c of XC) drawSpr(c.v > 1 ? GLOW.purple : GLOW.green, c.x, c.y, 0, c.v > 1 ? 1.1 : 0.7);
+  for (const c of XC) drawSpr(c.coin ? GLOW.amber : c.v > 1 ? GLOW.purple : GLOW.green, c.x, c.y, 0, c.v > 1 ? 1.1 : 0.7);
   ctx.globalCompositeOperation = 'source-over';
   for (const c of XC) {
     if (c.t > 7 && Math.floor(c.t * 10) % 2) continue;
-    drawSpr(c.v > 1 ? SPR.xc5 : SPR.xc1, c.x, c.y, Math.sin(c.t * 4 + c.x) * 0.3);
+    if (c.coin) { const sx = Math.abs(Math.cos(c.t * 5 + c.x)); ctx.save(); ctx.translate(c.x, c.y); ctx.scale(0.3 + sx * 0.7, 1); const sp = c.v > 1 ? SPR.coinBig : SPR.coin; ctx.drawImage(sp, -sp.w / 2, -sp.h / 2, sp.w, sp.h); ctx.restore(); }
+    else drawSpr(c.v > 1 ? SPR.xc5 : SPR.xc1, c.x, c.y, Math.sin(c.t * 4 + c.x) * 0.3);
   }
 }
 
@@ -119,7 +120,7 @@ function hurtPlayer() {
   burst(P.x, P.y, 18, 'cyan', 260, 0.6, 1.1);
   if (P.shield > 0) return;
   if (P.revive) {
-    P.revive = false; P.shield = SHIP.armor + D.armor; P.inv = 3.2; flash = 0.7; vib(250);
+    P.revive = false; P.shield = startShield(); P.inv = 3.2; flash = 0.7; vib(250);
     NOVA = { x: P.x, y: P.y, r: 0, hit: [], bossHit: false }; P.reviveT = 1.3;
     FT.push({ x: W / 2, y: H * 0.5, t: 0, s: '¡RENACER!', big: true, col: '#ff6a2b' }); SFX.bomb();
     return;
@@ -127,7 +128,7 @@ function hurtPlayer() {
   if (P.lives > 1) {
     P.lives--; explode(P.x, P.y, 2.5); flash = 0.6; vib(250);
     for (const b of eB) if (Math.hypot(b.x - P.x, b.y - P.y) < 220) b.dead = true;
-    P.shield = SHIP.armor + D.armor; P.inv = 3.2;
+    P.shield = startShield(); P.inv = 3.2;
     P.x = P.tx = W / 2; P.y = P.ty = H - 180; P.esc.forEach(e => { e.x = P.x; e.y = P.y; });
     FT.push({ x: W / 2, y: H * 0.5, t: 0, s: 'VIDAS: ' + P.lives, big: true, col: '#ff3355' });
     return;

@@ -110,6 +110,7 @@ const SFX = {
   ultReady() { [660, 880, 1320].forEach((f, i) => tone(f, 0.2, 'triangle', 0.09, 0, i * 0.08)); },
   tink(x = W / 2) { if (throttle('tk', 80)) { tone(2400, 0.05, 'triangle', 0.03, 1800, 0, panX(x)); tone(3600, 0.04, 'sine', 0.02, 0, 0, panX(x)); } },
   thunder() { noise(2.2, 0.35, 500, 0, rand(-0.6, 0.6), 'lowpass', 40); tone(50, 1.8, 'sine', 0.2, 30, 0.05); },
+  coin() { if (throttle('cn', 50)) { tone(1568, 0.06, 'square', 0.03, 0, 0); tone(2093, 0.1, 'square', 0.025, 0, 0.05); } },
   ui() { tone(1200, 0.05, 'triangle', 0.06, 1800); }
 };
 

@@ -652,7 +652,7 @@ function updateBoss(dt) {
     if (b.dying > 2.4) {
       explode(cx, cy, 5); explode(cx - 120, cy, 3); explode(cx + 120, cy, 3); flash = 1; shake = 24;
       if (Df.ground) marks.push({ x: cx, y: cy, s: 4 });
-      dropXP(cx, cy, 60);
+      dropXP(cx, cy, 60); dropCoins(cx, cy, 25 + level * 4);
       for (const [t, dx] of [['P', -70], ['V', 0], ['S', 70]]) PU.push({ x: clamp(cx + dx, 40, W - 40), y: clamp(cy, 80, H * 0.6), t, tt: 0 });
       if (b.idx === BOSS_DEFS.length - 1) FT.push({ x: W / 2, y: H * 0.45, t: 0, s: '¡OMEGA DERROTADO! CICLO ' + (Math.floor(level / BOSS_DEFS.length) + 1), big: true, col: '#ffd23f' });
       boss = null; level++; stageT = 0; waveT = 4; G.phase = 'waves'; LASERS = []; showBanner();

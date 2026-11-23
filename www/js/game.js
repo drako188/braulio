@@ -40,6 +40,7 @@ function startGame() {
   P = { x: W / 2, y: H - 180, tx: W / 2, ty: H - 180, px: W / 2, r: SHIP.hit * (D.id === 'easy' ? 0.85 : 1), shield: sh, maxShield: SHIP.maxArmor + D.armor,
     wl: SHIP.id === 'falcon' ? 2 : 1, bombs: SHIP.bombs, inv: 2.5, fireT: 0, missT: 0.5, alive: true, bank: 0, deadT: 0, regen: 0 };
   initProgress();
+  P.maxShield += upg('arm'); P.shield = startShield(); runCoins = 0;
   P.ult = 0; P.ultT = 0; P.revive = SHIP.id === 'fenix'; STRIKES = []; NOVA = null; HOLE = null; BEAM = null;
   pB = []; eB = []; EN = []; PA = []; PU = []; RINGS = []; FT = []; LASERS = []; marks = [];
   score = 0; level = 1; stageT = 0; waveT = 1.5; boss = null; warnT = 0; newRecord = false;
@@ -285,6 +286,7 @@ function hitEnemy(e, d, x, y) {
     if (e.ground) marks.push({ x: e.x, y: e.y, s: 0.9 });
     if (e.type === 'mine') { const n = D.id === 'hard' ? 12 : D.id === 'easy' ? 6 : 8; for (let i = 0; i < n; i++) eShot(e.x, e.y, i / n * TAU + e.rot, 140 * D.bullet); }
     dropXP(e.x, e.y, e.score / 50 * (big ? 1.5 : 1) * (e.elite ? 1.5 : 1));
+    dropCoins(e.x, e.y, coinsForKill(e, big));
     const t = rollDrop(big || e.elite);
     if (t) PU.push({ x: e.x, y: e.y, t, tt: 0 });
   } else SFX.hit(x);
@@ -425,7 +427,7 @@ function explode(x, y, s = 1) {
 /* ---------------- Update ---------------- */
 function update(dt) {
   G.t += dt;
-  const inMenu = G.state === 'menu' || (G.state === 'settings' && G.prev === 'menu');
+  const inMenu = G.state === 'menu' || G.state === 'hangar' || (G.state === 'settings' && (G.prev === 'menu' || G.prev === 'hangar'));
   if (inMenu) setMusic('menu'); else if (G.state === 'over') setMusic('over');
   duckMusic(G.state === 'paused' || (G.state === 'settings' && !inMenu));
   if (G.state !== 'play') laserHum(false);
@@ -433,7 +435,7 @@ function update(dt) {
   if (G.state === 'paused' || G.state === 'settings') { if (inMenu) updateBG(dt); return; }
   updateBG(dt);
   shake = Math.max(0, shake - dt * 30); flash = Math.max(0, flash - dt * 2.2);
-  if (G.state === 'menu') return;
+  if (G.state === 'menu' || G.state === 'hangar') return;
   stageT += dt;
   if (banner) { banner.t += dt; if (banner.t > 3) banner = null; }
   if (P.alive) {
@@ -457,7 +459,7 @@ function update(dt) {
     }
   } else {
     P.deadT += dt;
-    if (P.deadT > 1.6 && G.state === 'play') { G.state = 'over'; overT = 0; }
+    if (P.deadT > 1.6 && G.state === 'play') { G.state = 'over'; overT = 0; saveData(true); }
   }
   if (G.state === 'over') overT += dt;
   if (G.state === 'play') spawner(dt);
@@ -485,7 +487,7 @@ function update(dt) {
   EN = EN.filter(e => !e.dead);
   for (const u of PU) {
     u.tt += dt; u.y += 75 * dt; u.x += Math.sin(u.tt * 3) * 30 * dt;
-    if (P.alive) { const dx = P.x - u.x, dy = P.y - u.y, d = Math.hypot(dx, dy); if (d < (P.buf.magnet > 0 ? 2000 : 120) && d > 0) { u.x += dx / d * 420 * dt; u.y += dy / d * 420 * dt; } }
+    if (P.alive) { const dx = P.x - u.x, dy = P.y - u.y, d = Math.hypot(dx, dy); if (d < (P.buf.magnet > 0 ? 2000 : 120 + upg('mag') * 30) && d > 0) { u.x += dx / d * 420 * dt; u.y += dy / d * 420 * dt; } }
   }
   PU = PU.filter(u => !u.dead && u.y < H + 30);
   const damp = Math.pow(0.04, dt);
