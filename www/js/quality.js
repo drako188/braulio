@@ -34,7 +34,7 @@ function resumeCheckpoint() {
   const c = SAVE.cp; if (!c) return;
   const si = SHIPS.findIndex(s => s.id === c.ship), di = DIFFS.findIndex(d => d.id === c.diff);
   if (si < 0 || di < 0) { clearCheckpoint(); return; }
-  selShip = si; selDiff = di;
+  selShip = si; selDiff = di; G.mode = 'story';
   startGame(true);
   level = c.level; score = c.score; P.lvl = c.lvl; syncWeapon(); P.shield = c.shield; P.lives = c.lives; P.bombs = c.bombs; P.ult = c.ult; runCoins = c.coins; P.revive = c.revive;
   setTheme((level - 1) % THEMES.length, true); showBanner(); setMusic('stage', level);

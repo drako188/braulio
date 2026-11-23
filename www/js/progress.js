@@ -114,7 +114,7 @@ function hurtPlayer() {
     RINGS.push({ x: P.x, y: P.y, t: 0, dur: 0.35, r: 70, c: 'rgba(127,246,255,' });
     return;
   }
-  P.shield--; BOSSFIGHT.hurt = true; shake = 14; SFX.hurt(); vib(90);
+  P.shield--; SECT.hits++; BOSSFIGHT.hurt = true; shake = 14; SFX.hurt(); vib(90);
   if (P.lvl > minLvl()) { P.lvl--; syncWeapon(); FT.push({ x: P.x, y: P.y - 60, t: 0, s: 'NIVEL ' + P.lvl, col: '#ff7a8a' }); }
   P.xp = 0; P.inv = D.inv; comboBreak();
   burst(P.x, P.y, 18, 'cyan', 260, 0.6, 1.1);
@@ -134,7 +134,7 @@ function hurtPlayer() {
     return;
   }
   P.lives = 0; P.alive = false; explode(P.x, P.y, 3); flash = 0.8; vib(400); laserHum(false);
-  if (score > hi) { hi = score; newRecord = true; try { localStorage.setItem('ns_hi_' + D.id, hi); } catch (e) { } }
+  if (score > hi) { hi = score; newRecord = true; try { localStorage.setItem(hiKey(), hi); } catch (e) { } }
 }
 
 /* ---------------- Power-ups ---------------- */

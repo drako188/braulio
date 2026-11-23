@@ -4,6 +4,11 @@ Shooter vertical futurista para Android: pilota un caza estelar sobre una ciudad
 y derriba oleadas de drones, interceptores, giro-drones y la gran **nave nodriza** al final de cada sector.
 
 ## Cómo se juega
+- **HISTORIA**: los 10 sectores con sus jefes y escenas. **∞ INFINITO**: oleadas sin fin con jefes al azar y récord propio.
+- Al vencer a cada jefe ves tu **calificación (S/A/B/C)** según tiempo, golpes recibidos y combo, con monedas de bonificación.
+- Si cierras la app, puedes **CONTINUAR** desde el último sector alcanzado. La primera partida incluye un tutorial.
+- **Tienda** (carrito del menú): monedas gratis con anuncios, Pack Piloto, Sin anuncios y bolsas de monedas.
+  Guía para publicar y monetizar: ver [PUBLICAR.md](PUBLICAR.md).
 - En el menú elige **dificultad** y **nave**, y pulsa **DESPEGAR**.
 - **Arrastra** el dedo para mover la nave (disparo automático).
 - **Botón naranja (bomba):** borra todas las balas enemigas y daña a todos los enemigos.
@@ -127,7 +132,7 @@ En **⚙ Ajustes** se puede activar/desactivar y regular la música y los efecto
 ## Estructura
 - `www/index.html` + `www/js/` — el juego (HTML5 Canvas, sin dependencias):
   `core` (pantalla y utilidades), `sprites`, `background`, `audio` (efectos y música),
-  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `shipskins` (diseño de las naves), `bossskins` (diseño de los jefes), `bosses` (los 10 jefes), `chaos` (eventos, élites y combos), `themes` (escenarios y clima), `shop` (monedas y hangar), `achievements` (logros y misiones), `story` (modo historia), `render` (dibujo y menús), `input` (controles y bucle).
+  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `shipskins` (diseño de las naves), `bossskins` (diseño de los jefes), `bosses` (los 10 jefes), `chaos` (eventos, élites y combos), `themes` (escenarios y clima), `shop` (monedas y hangar), `achievements` (logros y misiones), `story` (modo historia), `quality` (gráficos, continuar y tutorial), `monetize` (anuncios y tienda), `modes` (infinito y resultados), `render` (dibujo y menús), `input` (controles y bucle).
   Se puede abrir `www/index.html` directamente en un navegador para probarlo.
 - `android/` — app Android nativa (WebView a pantalla completa) que empaqueta `www/` como assets.
 - `.github/workflows/android.yml` — compila el APK automáticamente en GitHub Actions.

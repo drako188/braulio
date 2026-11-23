@@ -129,12 +129,13 @@ function hangarTap(x, y) {
   UPGS.forEach(([k], i) => { if (inR(x, y, L.rows[i].buy)) buyUpgrade(k); });
 }
 /* botones del menú principal */
-function menuButtons() { return { hangar: { x: 24, y: H * 0.86 - 32, w: 150, h: 64 }, start: { x: 186, y: H * 0.86 - 32, w: W - 210, h: 64 } }; }
+function menuButtons() { return { hangar: { x: 20, y: H * 0.86 - 32, w: 128, h: 64 }, endless: { x: 156, y: H * 0.86 - 32, w: 128, h: 64 }, start: { x: 292, y: H * 0.86 - 32, w: W - 312, h: 64 } }; }
 function drawMenuButtons() {
   const B = menuButtons(), S = SHIPS[selShip], pulse = 0.85 + Math.sin(G.t * 4) * 0.15;
-  btn(B.hangar, 'HANGAR', '#ffd23f', false, 18);
-  if (isUnlocked(S.id)) { ctx.globalAlpha = pulse; btn(B.start, 'DESPEGAR', S.col, true, 26); ctx.globalAlpha = 1; }
-  else btn(B.start, 'DESBLOQUEAR ' + coinLabel(SHIP_PRICE[S.id]), '#ffd23f', SAVE.coins >= SHIP_PRICE[S.id], 17);
+  btn(B.hangar, 'HANGAR', '#ffd23f', false, 17);
+  btn(B.endless, '∞ INFINITO', '#c86bff', false, 16);
+  if (isUnlocked(S.id)) { ctx.globalAlpha = pulse; btn(B.start, 'HISTORIA', S.col, true, 22); ctx.globalAlpha = 1; }
+  else btn(B.start, 'COMPRAR ' + coinLabel(SHIP_PRICE[S.id]), '#ffd23f', SAVE.coins >= SHIP_PRICE[S.id], 17);
   txt(coinLabel(SAVE.coins), 22, 30, 18, '#ffd23f', 'left', '#ff9a00', 900);
   if (!isUnlocked(S.id)) drawLock(W / 2, H * 0.435);
   if (hangarMsg && hangarMsg.t > 0) { hangarMsg.t -= 1 / 60; txt(hangarMsg.s, W / 2, H * 0.86 - 48, 15, hangarMsg.col, 'center', null, 800); }
@@ -142,6 +143,7 @@ function drawMenuButtons() {
 function menuButtonsTap(x, y) {
   const B = menuButtons(), S = SHIPS[selShip];
   if (inR(x, y, B.hangar)) { G.state = 'hangar'; SFX.ui(); return true; }
-  if (inR(x, y, B.start)) { if (isUnlocked(S.id)) startGame(); else buyShip(S.id); return true; }
+  if (inR(x, y, B.start)) { if (isUnlocked(S.id)) startStory(); else buyShip(S.id); return true; }
+  if (inR(x, y, B.endless)) { if (isUnlocked(S.id)) startEndless(); else buyShip(S.id); return true; }
   return false;
 }

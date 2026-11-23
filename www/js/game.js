@@ -48,9 +48,10 @@ function startGame(resume) {
   setTheme(0, true);
   COMBO.n = 0; COMBO.t = 0; COMBO.best = 0; eventT = rand(10, 14); lastEvent = -1; bgSpeed = 70;
   G.state = 'play'; G.phase = 'waves'; showBanner(); SFX.start(); setMusic('stage', 1); RADIO = null; tipDone = {};
-  if (!resume) { if (!SAVE.introSeen) { SAVE.introSeen = 1; saveData(true); playScene(STORY.intro); } tutStart(); }
+  if (!resume) G.mode = 'story';
+  if (!resume && G.mode === 'story') { if (!SAVE.introSeen) { SAVE.introSeen = 1; saveData(true); playScene(STORY.intro); } tutStart(); }
 }
-function showBanner() { banner = { t: 0, a: 'SECTOR ' + level, b: SECTORS[(level - 1) % SECTORS.length] }; setTheme((level - 1) % THEMES.length); ACH.sector(level); saveCheckpoint(); }
+function showBanner() { banner = { t: 0, a: 'SECTOR ' + level, b: SECTORS[(level - 1) % SECTORS.length] }; setTheme((level - 1) % THEMES.length); ACH.sector(level); saveCheckpoint(); sectReset(); }
 const aim = (x, y) => Math.atan2(P.y - y, P.x - x);
 const bspd = () => Math.min(410, (175 + level * 18) * D.bullet);
 const cd = s => s / D.fire;
@@ -283,7 +284,7 @@ function hitEnemy(e, d, x, y) {
   e.hp -= d; e.hit = 0.06;
   burst(x, y, 3, 'cyan', 140, 0.25, 0.5);
   if (e.hp <= 0 && !e.dead) {
-    e.dead = true; comboKill(); ACH.kill(e); addScore(e.score, e.x, e.y); gainUlt(e.score / 60);
+    e.dead = true; comboKill(); ACH.kill(e); SECT.kills++; SECT.combo = Math.max(SECT.combo, COMBO.n); addScore(e.score, e.x, e.y); gainUlt(e.score / 60);
     const big = e.type === 'spinner' || e.type === 'cruiser' || e.type === 'bomber';
     explode(e.x, e.y, e.type === 'bomber' ? 3 : big ? 2.2 : e.type === 'tank' ? 1.4 : 1);
     if (e.ground) marks.push({ x: e.x, y: e.y, s: 0.9 });
@@ -440,11 +441,12 @@ function update(dt) {
   if (G.state !== 'play') laserHum(false);
   else if (G.phase === 'waves') MUS.intensity = stageT < 20 ? 0 : stageT < 45 ? 1 : 2;
   if (G.state === 'story') { SCENE.t += dt; updateBG(dt * 0.4); return; }
+  if (G.state === 'results') { updateBG(dt * 0.4); return; }
   if (G.state === 'paused' || G.state === 'settings') { if (inMenu) updateBG(dt); return; }
   updateBG(dt);
   shake = Math.max(0, shake - dt * 30); flash = Math.max(0, flash - dt * 2.2);
   if (MENUS.includes(G.state)) return;
-  if (G.state === 'play') RUNTIME.t += dt;
+  if (G.state === 'play') { RUNTIME.t += dt; SECT.t += dt; }
   stageT += dt;
   if (banner) { banner.t += dt; if (banner.t > 3) banner = null; }
   if (P.alive) {

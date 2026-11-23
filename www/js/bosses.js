@@ -603,10 +603,10 @@ const BOSS_DEFS = [
 
 /* ---------------- Motor común de jefes ---------------- */
 const bossDef = (b = boss) => BOSS_DEFS[b.idx];
-function nextBoss() { return BOSS_DEFS[(level - 1) % BOSS_DEFS.length]; }
+function nextBoss() { return BOSS_DEFS[G.mode === 'endless' ? ENDLESS.next : (level - 1) % BOSS_DEFS.length]; }
 function bossCenter(b = boss) { const Df = bossDef(b); return Df.center ? Df.center(b) : [b.x, b.y]; }
 function spawnBoss() {
-  const idx = (level - 1) % BOSS_DEFS.length, Df = BOSS_DEFS[idx], cycle = Math.floor((level - 1) / BOSS_DEFS.length);
+  const idx = G.mode === 'endless' ? ENDLESS.next : (level - 1) % BOSS_DEFS.length, Df = BOSS_DEFS[idx], cycle = Math.floor((level - 1) / BOSS_DEFS.length);
   const hp = Math.round(Df.hp * (1 + 0.3 * (level - 1)) * (1 + cycle * 0.5) * D.hp);
   boss = { idx, kind: Df.kind, name: Df.name, x: W / 2, y: -170, hp, maxhp: hp, t: 0, hit: 0, enter: true, a1: 1, a2: 0.5, a3: 4, spin: 0, dying: 0,
     ta: [Math.PI / 2, Math.PI / 2, Math.PI / 2, Math.PI / 2], rage: false };
@@ -656,7 +656,7 @@ function updateBoss(dt) {
       dropXP(cx, cy, 60); dropCoins(cx, cy, 25 + level * 4);
       for (const [t, dx] of [['P', -70], ['V', 0], ['S', 70]]) PU.push({ x: clamp(cx + dx, 40, W - 40), y: clamp(cy, 80, H * 0.6), t, tt: 0 });
       if (b.idx === BOSS_DEFS.length - 1) FT.push({ x: W / 2, y: H * 0.45, t: 0, s: '¡OMEGA DERROTADO! CICLO ' + (Math.floor(level / BOSS_DEFS.length) + 1), big: true, col: '#ffd23f' });
-      const bidx = b.idx; boss = null; level++; stageT = 0; waveT = 4; G.phase = 'waves'; LASERS = []; afterBoss(bidx);
+      const bidx = b.idx; boss = null; level++; stageT = 0; waveT = 4; G.phase = 'waves'; LASERS = []; showResults(bidx);
     }
     return;
   }

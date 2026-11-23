@@ -39,6 +39,7 @@ cv.addEventListener('pointerdown', e => {
   if (G.state === 'menu' && near(x, y, ACH_BTN(), 32)) { G.state = 'achievements'; achScroll = 0; SFX.ui(); return; }
   if (G.state === 'menu') { menuTap(x, y); return; }
   if (G.state === 'ad') return;
+  if (G.state === 'results') { resultsTap(); return; }
   if (G.state === 'over') { overTap(x, y); return; }
   if (G.state === 'paused') { if (inR(x, y, pauseLayout().menu)) G.state = 'menu'; else G.state = 'play'; return; }
   if (near(x, y, UI.pause, 30)) { G.state = 'paused'; dragId = null; return; }

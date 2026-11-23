@@ -195,8 +195,8 @@ function drawHUD() {
   ctx.fillStyle = lg(ctx, 0, 0, 0, 90, ['rgba(0,0,0,0.65)', 'rgba(0,0,0,0)']); ctx.fillRect(0, 0, W, 90);
   txt(String(score).padStart(8, '0'), 20, 34, 28, '#ffffff', 'left', SHIP.col, 900);
   txt('RÉCORD ' + Math.max(hi, score), 20, 62, 13, '#8fb8d8', 'left', null, 700);
-  txt('S-' + level, W - 150, 32, 15, '#ff7ae8', 'center', null, 800);
-  txt(D.name, W - 150, 52, 10, D.col, 'center', null, 800);
+  txt((G.mode === 'endless' ? 'O-' + ENDLESS.wave : 'S-' + level), W - 150, 32, 15, '#ff7ae8', 'center', null, 800);
+  txt(G.mode === 'endless' ? '∞ ' + D.name : D.name, W - 150, 52, 10, D.col, 'center', null, 800);
   txt(coinLabel(runCoins), W - 150, 70, 12, '#ffd23f', 'center', null, 900);
   drawGear();
   const [px, py] = UI.pause; drawIconBtn(px, py, 22, 'rgba(0,229,255,0.7)');
@@ -275,7 +275,7 @@ function drawMenu() {
   wrapText(S.desc, W / 2, H * 0.625 + 4 * 25 + 6, W - 70, 19, 14, '#c8d4e6');
   drawMenuButtons(); drawAchButton(); drawStoreButton();
   if (SAVE.cp) { const c = SAVE.cp, sh = SHIPS.find(s => s.id === c.ship); btn(CONT_BTN(), '▶ CONTINUAR · SECTOR ' + c.level + ' · ' + (sh ? sh.name : ''), '#39ff88', true, 15); }
-  else txt('RÉCORD ' + DIFFS[selDiff].name + '  ' + getHi(selDiff), W / 2, H * 0.94, 15, '#ffcf6a', 'center', null, 800);
+  else txt('RÉCORD ' + DIFFS[selDiff].name + ':  historia ' + getHi(selDiff) + '  ·  ∞ ' + getHiMode('endless', selDiff), W / 2, H * 0.94, 14, '#ffcf6a', 'center', null, 800);
   drawGear();
 }
 function pauseLayout() { return { cont: { x: W / 2 - 130, y: H * 0.5, w: 260, h: 56 }, menu: { x: W / 2 - 130, y: H * 0.5 + 76, w: 260, h: 56 } }; }
@@ -312,6 +312,7 @@ function render() {
     drawHUD();
     if (under === 'over') drawOver();
     if (under === 'story') drawStory();
+    if (under === 'results') drawResults();
     if (under === 'paused') {
       ctx.fillStyle = 'rgba(2,4,12,0.6)'; ctx.fillRect(0, 0, W, H);
       txt('PAUSA', W / 2, H * 0.38, 60, '#ffffff', 'center', '#00e5ff', 900);
