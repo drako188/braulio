@@ -114,12 +114,12 @@ const SFX = {
 
 /* ---------------- Zumbido continuo de los láseres ---------------- */
 const HUMS = {};
-function humCtl(key, on, f1 = 98, f2 = 197, vol = 0.1, lfoF = 22, cut = 1300) {
+function humCtl(key, on, f1 = 98, f2 = 197, vol = 0.1, lfoF = 22, cut = 1300, types = ['sawtooth', 'square']) {
   if (!AC) return;
   const t = AC.currentTime, h = HUMS[key];
   if (on && !h && SET.sfx) {
     const o1 = AC.createOscillator(), o2 = AC.createOscillator(), lfo = AC.createOscillator(), lg2 = AC.createGain(), f = AC.createBiquadFilter(), g = AC.createGain();
-    o1.type = 'sawtooth'; o1.frequency.value = f1; o2.type = 'square'; o2.frequency.value = f2;
+    o1.type = types[0]; o1.frequency.value = f1; o2.type = types[1]; o2.frequency.value = f2;
     lfo.frequency.value = lfoF; lg2.gain.value = cut * 0.4; lfo.connect(lg2); lg2.connect(f.frequency);
     f.type = 'lowpass'; f.frequency.value = cut; f.Q.value = 4;
     g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.08);

@@ -15,9 +15,9 @@ const SHIPS = [
     desc: 'Ondas que atraviesan enemigos y misiles teledirigidos. Cañón de poco daño.' }
 ];
 const DIFFS = [
-  { id: 'easy', name: 'FÁCIL', col: '#39ff88', hp: 0.7, bullet: 0.8, fire: 0.7, armor: 1, score: 0.7, spawn: 1.2, drop: 1.4 },
-  { id: 'normal', name: 'INTERMEDIO', col: '#00e5ff', hp: 1, bullet: 1, fire: 1, armor: 0, score: 1, spawn: 1, drop: 1 },
-  { id: 'hard', name: 'DIFÍCIL', col: '#ff3355', hp: 1.45, bullet: 1.2, fire: 1.35, armor: 0, score: 1.6, spawn: 0.82, drop: 0.7 }
+  { id: 'easy', name: 'FÁCIL', col: '#39ff88', hp: 0.8, bullet: 0.88, fire: 0.8, armor: 1, score: 0.7, spawn: 1.1, drop: 1.3, dbl: 0.06, lead: 0.15, inv: 2.4, elite: 0.05 },
+  { id: 'normal', name: 'INTERMEDIO', col: '#00e5ff', hp: 1.15, bullet: 1.12, fire: 1.3, armor: 0, score: 1, spawn: 0.78, drop: 0.85, dbl: 0.25, lead: 0.5, inv: 1.7, elite: 0.12 },
+  { id: 'hard', name: 'DIFÍCIL', col: '#ff3355', hp: 1.6, bullet: 1.3, fire: 1.7, armor: 0, score: 1.6, spawn: 0.62, drop: 0.6, dbl: 0.4, lead: 0.8, inv: 1.3, elite: 0.22 }
 ];
 let selShip = 0, selDiff = 1;
 try {
@@ -43,16 +43,17 @@ function startGame() {
   P.ult = 0; P.ultT = 0; P.revive = SHIP.id === 'fenix'; STRIKES = []; NOVA = null; HOLE = null; BEAM = null;
   pB = []; eB = []; EN = []; PA = []; PU = []; RINGS = []; FT = []; LASERS = []; marks = [];
   score = 0; level = 1; stageT = 0; waveT = 1.5; boss = null; warnT = 0; newRecord = false;
+  COMBO.n = 0; COMBO.t = 0; COMBO.best = 0; eventT = rand(10, 14); lastEvent = -1; bgSpeed = 70;
   G.state = 'play'; G.phase = 'waves'; showBanner(); SFX.start(); setMusic('stage', 1);
 }
 function showBanner() { banner = { t: 0, a: 'SECTOR ' + level, b: SECTORS[(level - 1) % SECTORS.length] }; }
 const aim = (x, y) => Math.atan2(P.y - y, P.x - x);
-const bspd = () => Math.min(360, (175 + level * 18) * D.bullet);
+const bspd = () => Math.min(410, (175 + level * 18) * D.bullet);
 const cd = s => s / D.fire;
 function eShot(x, y, a, spd, big = false, k = null) {
   SFX.eshot(x, big); eB.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: big || k === 'ice' || k === 'web' ? 8 : 6, big, k }); }
 function addScore(pts, x, y, big) {
-  const v = Math.round(pts * D.score * scoreMult()); score += v;
+  const v = Math.round(pts * D.score * scoreMult() * comboMult()); score += v;
   FT.push({ x, y, t: 0, s: '+' + v, big: !!big });
 }
 
@@ -130,7 +131,7 @@ const DEF = {
 function addEnemy(type, x, y, o = {}) {
   const d = DEF[type], hp = Math.round(d.hp * (1 + 0.35 * (level - 1)) * D.hp);
   const e = Object.assign({ type, x, y, hp, maxhp: hp, r: d.r, score: d.score, ground: !!d.ground, t: 0, hit: 0, rot: 0, delay: 0, fireT: rand(0.8, 2.2), vx: 0, vy: 0, ta: Math.PI / 2 }, o);
-  EN.push(e); return e;
+  maybeElite(e, o); EN.push(e); return e;
 }
 function wDroneLine() { for (let i = 0; i < 5; i++) { const bx = 70 + i * 100; addEnemy('drone', bx, -40, { mode: 'sine', bx, amp: 30, ph: i * 0.8 }); } }
 function wDroneV() { const cx = rand(170, W - 170); for (let k = -3; k <= 3; k++) addEnemy('drone', cx + k * 48, -40 - Math.abs(k) * 40, { mode: 'sine', bx: cx + k * 48, amp: 10, ph: 0 }); }
@@ -164,11 +165,12 @@ function spawner(dt) {
     if (stageT > bossAt) { G.phase = 'warn'; warnT = 4.6; SFX.warn(); setMusic('warn'); return; }
     if (stageT > bossAt - 4) return;
     waveT -= dt;
-    if (waveT <= 0 && EN.length < 18) {
+    if (waveT <= 0 && EN.length < 24) {
+      const heat = 1 + Math.min(1.1, stageT / 55) * Math.min(1, 0.6 + level * 0.2);
       const avail = WAVES.filter(w => stageT >= w.min / level);
-      let r = Math.random() * avail.reduce((s, w) => s + w.w, 0);
-      for (const w of avail) { r -= w.w; if (r <= 0) { w.f(); break; } }
-      waveT = (Math.max(1.2, 3.0 - level * 0.25) + rand(0, 0.8)) * D.spawn;
+      const pickWave = () => { let r = Math.random() * avail.reduce((s, w) => s + w.w, 0); for (const w of avail) { r -= w.w; if (r <= 0) { w.f(); break; } } };
+      pickWave(); if (Math.random() < D.dbl * heat) pickWave();
+      waveT = (Math.max(0.7, (2.7 - level * 0.2) / heat) + rand(0, 0.7)) * D.spawn;
     }
   } else if (G.phase === 'warn') {
     warnT -= dt; if (warnT <= 0) spawnBoss();
@@ -176,7 +178,7 @@ function spawner(dt) {
 }
 function updateEnemy(e, dt) {
   if (e.delay > 0) { e.delay -= dt; return; }
-  e.t += dt; e.hit = Math.max(0, e.hit - dt); e.fireT -= dt;
+  e.t += dt; e.hit = Math.max(0, e.hit - dt); e.fireT -= dt * (e.elite ? 1.6 : 1);
   const L = level, alive = P.alive;
   switch (e.type) {
     case 'drone':
@@ -184,26 +186,36 @@ function updateEnemy(e, dt) {
       else { e.x += e.dir * 210 * dt; e.y += (40 + e.t * 70) * dt; if (e.x < -60 || e.x > W + 60) e.dead = true; }
       if (e.fireT <= 0) {
         e.fireT = cd(rand(2, 3.5) / (1 + 0.15 * (L - 1)));
-        if (alive && e.y > 30 && e.y < H * 0.6 && Math.random() < 0.65) eShot(e.x, e.y + 14, aim(e.x, e.y), bspd());
+        if (alive && e.y > 30 && e.y < H * 0.65 && Math.random() < 0.75) eShot(e.x, e.y + 14, aimAt(e.x, e.y, bspd()), bspd());
       }
       break;
     case 'fighter':
       if (!e.dive) {
         e.y += 240 * dt;
         if (e.t > 0.8) {
-          e.dive = true; const a = alive ? aim(e.x, e.y) : Math.PI / 2;
+          e.dive = true; const a = alive ? aimAt(e.x, e.y, 430) : Math.PI / 2;
           e.vx = Math.cos(a) * 430; e.vy = Math.max(160, Math.sin(a) * 430);
           e.rot = Math.atan2(e.vy, e.vx) - Math.PI / 2;
           if (alive) for (const k of (L >= 2 || D.id === 'hard' ? [-0.2, 0, 0.2] : [0])) eShot(e.x, e.y + 20, a + k, bspd() + 40);
         }
       } else { e.x += e.vx * dt; e.y += e.vy * dt; if (e.x < -80 || e.x > W + 80) e.dead = true; }
       break;
+    case 'debris':
+      e.x += e.vx * dt; e.y += e.vy * dt; e.rot += e.vr * dt;
+      if (e.x < -60 || e.x > W + 60) e.dead = true;
+      break;
     case 'hunter':
+      if (e.up) {
+        e.x += e.dir * 170 * dt; e.y -= 250 * dt; e.rot = Math.atan2(-250, e.dir * 170) - Math.PI / 2;
+        if (e.fireT <= 0 && e.y > 60 && e.y < H - 60) { e.fireT = cd(0.8); if (alive) eShot(e.x, e.y, aimAt(e.x, e.y, bspd()), bspd() + 30); }
+        if (e.y < -80 || e.x < -80 || e.x > W + 80) e.dead = true;
+        break;
+      }
       e.x += e.dir * 230 * dt; e.y = e.by + Math.sin(e.t * 2.5) * 28;
       e.rot = e.dir > 0 ? -Math.PI / 2 + 0.25 : Math.PI / 2 - 0.25;
       if (e.fireT <= 0 && e.x > 20 && e.x < W - 20) {
         e.fireT = cd(0.9);
-        if (alive) { const a = aim(e.x, e.y); eShot(e.x, e.y, a - 0.08, bspd() + 30); eShot(e.x, e.y, a + 0.08, bspd() + 30); }
+        if (alive) { const a = aimAt(e.x, e.y, bspd()); eShot(e.x, e.y, a - 0.08, bspd() + 30); eShot(e.x, e.y, a + 0.08, bspd() + 30); }
       }
       if (e.x < -80 || e.x > W + 80) e.dead = true;
       break;
@@ -253,7 +265,7 @@ function updateEnemy(e, dt) {
       if (alive) { let d = aim(e.x, e.y) - e.ta; d = Math.atan2(Math.sin(d), Math.cos(d)); e.ta += clamp(d, -2.5 * dt, 2.5 * dt); }
       if (e.fireT <= 0 && e.y > 20 && e.y < H - 120 && alive) {
         e.fireT = cd(rand(1.8, 2.6));
-        eShot(e.x + Math.cos(e.ta) * 22, e.y + Math.sin(e.ta) * 22, e.ta, bspd() * 0.95, true);
+        const ta = aimAt(e.x, e.y, bspd() * 0.95); eShot(e.x + Math.cos(e.ta) * 22, e.y + Math.sin(e.ta) * 22, ta, bspd() * 0.95, true);
         burst(e.x + Math.cos(e.ta) * 24, e.y + Math.sin(e.ta) * 24, 4, 'amber', 80, 0.2, 0.5); SFX.cannon(e.x);
       }
       break;
@@ -266,13 +278,13 @@ function hitEnemy(e, d, x, y) {
   e.hp -= d; e.hit = 0.06;
   burst(x, y, 3, 'cyan', 140, 0.25, 0.5);
   if (e.hp <= 0 && !e.dead) {
-    e.dead = true; addScore(e.score, e.x, e.y); gainUlt(e.score / 60);
+    e.dead = true; comboKill(); addScore(e.score, e.x, e.y); gainUlt(e.score / 60);
     const big = e.type === 'spinner' || e.type === 'cruiser' || e.type === 'bomber';
     explode(e.x, e.y, e.type === 'bomber' ? 3 : big ? 2.2 : e.type === 'tank' ? 1.4 : 1);
     if (e.ground) marks.push({ x: e.x, y: e.y, s: 0.9 });
     if (e.type === 'mine') { const n = D.id === 'hard' ? 12 : D.id === 'easy' ? 6 : 8; for (let i = 0; i < n; i++) eShot(e.x, e.y, i / n * TAU + e.rot, 140 * D.bullet); }
-    dropXP(e.x, e.y, e.score / 50 * (big ? 1.5 : 1));
-    const t = rollDrop(big);
+    dropXP(e.x, e.y, e.score / 50 * (big ? 1.5 : 1) * (e.elite ? 1.5 : 1));
+    const t = rollDrop(big || e.elite);
     if (t) PU.push({ x: e.x, y: e.y, t, tt: 0 });
   } else SFX.hit(x);
 }
@@ -432,6 +444,8 @@ function update(dt) {
     const dx = P.tx - P.x, dy = P.ty - P.y, d = Math.hypot(dx, dy), m = sp * dt;
     if (d <= m) { P.x = P.tx; P.y = P.ty; } else { P.x += dx / d * m; P.y += dy / d * m; }
     const vx = (P.x - P.px) / Math.max(dt, 0.001); P.px = P.x;
+    const vy = (P.y - (P.py == null ? P.y : P.py)) / Math.max(dt, 0.001); P.py = P.y;
+    P.vx = (P.vx || 0) * 0.85 + vx * 0.15; P.vy = (P.vy || 0) * 0.85 + vy * 0.15;
     P.bank += (clamp(vx / 700, -1, 1) - P.bank) * Math.min(1, dt * 10);
     P.inv = Math.max(0, P.inv - dt);
     if (SHIP.weapon !== 'beam') { P.fireT -= dt; if (P.fireT <= 0) { P.fireT = SHIP.rate * lvlRate() * (P.buf.hyper > 0 ? 0.5 : 1) * (P.ultT > 0 && SHIP.id === 'rayo' ? 0.33 : 1); firePlayer(); } }
@@ -463,7 +477,7 @@ function update(dt) {
   if (boss) updateBoss(eDt);
   updateLasers(eDt);
   for (const b of eB) { b.x += b.vx * eDt; b.y += b.vy * eDt; }
-  updateBuffs(dt); updateXP(dt); updateBeam(dt); updateUlt(dt);
+  updateBuffs(dt); updateXP(dt); updateBeam(dt); updateUlt(dt); updateChaos(dt);
   collisions();
   pB = pB.filter(b => !b.dead && b.y > -50 && b.y < H + 50 && b.x > -50 && b.x < W + 50);
   eB = eB.filter(b => !b.dead && b.x > -30 && b.x < W + 30 && b.y > -30 && b.y < H + 30);

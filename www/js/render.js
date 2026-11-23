@@ -26,7 +26,8 @@ function drawPlayer() {
   }
 }
 function drawEnemy(e) {
-  const air = e.type === 'fighter' || e.type === 'kamikaze' || e.type === 'hunter' || e.type === 'mine';
+  const air = e.type === 'fighter' || e.type === 'kamikaze' || e.type === 'hunter' || e.type === 'mine' || e.type === 'debris';
+  drawEliteFx(e);
   const rot = air ? e.rot : 0;
   if (e.type === 'spinner') { ctx.globalCompositeOperation = 'lighter'; drawSpr(SPR.blade, e.x, e.y, e.rot); ctx.globalCompositeOperation = 'source-over'; }
   if ((e.type === 'fighter' && e.dive) || e.type === 'hunter') {
@@ -36,6 +37,7 @@ function drawEnemy(e) {
   }
   if (e.type === 'bomber') { ctx.globalCompositeOperation = 'lighter'; for (const s of [-1, 1]) for (const ox of [32, 60]) drawSpr(GLOW.orange, e.x + s * ox, e.y - 44, 0, 0.9 + Math.random() * 0.3); ctx.globalCompositeOperation = 'source-over'; }
   drawSpr(SPR[e.type], e.x, e.y, rot);
+  drawEliteRing(e);
   if (e.type === 'tank') drawSpr(SPR.tankTurret, e.x, e.y + 2, e.ta);
   if (e.type === 'mine' && Math.floor(e.t * 3) % 2 === 0) { ctx.globalCompositeOperation = 'lighter'; drawSpr(GLOW.red, e.x, e.y, 0, 1); ctx.globalCompositeOperation = 'source-over'; }
   if (e.hit > 0) { ctx.globalAlpha = 0.7; drawSpr(FL[e.type], e.x, e.y, rot); ctx.globalAlpha = 1; }
@@ -98,7 +100,7 @@ function drawWorld() {
   if (boss && bossDef().ground) drawBossAny(boss);
   drawClouds();
   // sombras de unidades aéreas
-  for (const e of EN) if (!e.ground && e.delay <= 0) drawSpr(SHD[e.type], e.x + 20, e.y + 34, (e.type === 'fighter' || e.type === 'kamikaze' || e.type === 'hunter') ? e.rot : 0, 0.8);
+  for (const e of EN) if (!e.ground && e.delay <= 0) drawSpr(SHD[e.type], e.x + 20, e.y + 34, (e.type === 'fighter' || e.type === 'kamikaze' || e.type === 'hunter' || e.type === 'debris') ? e.rot : 0, 0.8);
   if (boss && bossDef().shadow) bossDef().shadow(boss);
   if (P.alive) { ctx.save(); ctx.translate(P.x + 22, P.y + 40); ctx.scale((1 - Math.abs(P.bank) * 0.2) * 0.8, 0.8); const s = SHD[SHIP.id]; ctx.drawImage(s, -s.w / 2, -s.h / 2, s.w, s.h); ctx.restore(); }
   // power-ups
@@ -205,7 +207,7 @@ function drawHUD() {
     ctx.fillStyle = i < P.shield ? '#39ff88' : 'rgba(57,255,136,0.12)'; ctx.fill();
     ctx.strokeStyle = 'rgba(57,255,136,0.7)'; ctx.lineWidth = 1.5; ctx.stroke();
   }
-  drawProgressHUD(); drawUltBtn();
+  drawProgressHUD(); drawUltBtn(); drawCombo(); drawAmbushWarn();
   const bx = UI.bomb[0], by = H - 74;
   ctx.fillStyle = P.bombs > 0 ? 'rgba(255,120,30,0.18)' : 'rgba(80,80,80,0.2)'; ctx.beginPath(); ctx.arc(bx, by, 40, 0, TAU); ctx.fill();
   ctx.strokeStyle = P.bombs > 0 ? '#ff8a2b' : '#555'; ctx.lineWidth = 3; ctx.stroke();

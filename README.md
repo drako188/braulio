@@ -29,11 +29,21 @@ y derriba oleadas de drones, interceptores, giro-drones y la gran **nave nodriza
 | **×2** | Puntos dobles (15 s) |
 | **1UP** | Vida extra (solo enemigos grandes y jefes) |
 
+### Ritmo e imprevistos
+- Cuanto más avanza el sector, más rápido llegan las oleadas (a veces dos a la vez) y más rápido se desplaza la ciudad.
+- **Eventos aleatorios** cada 12–19 s: emboscada por detrás (avisada con flechas rojas abajo), escuadrón élite,
+  lluvia de chatarra, enjambre de kamikazes y fuego cruzado.
+- **Enemigos élite** (brillo dorado): doble de vida, disparan más rápido y sueltan más premios.
+- Muchos enemigos **anticipan tu movimiento** al disparar (más a menudo cuanto más alta es la dificultad).
+- **Combos**: encadena derribos para multiplicar los puntos (hasta ×5); recibir un golpe rompe el combo.
+
 ### Dificultades
 | | Fácil | Intermedio | Difícil |
 |---|---|---|---|
-| Vida enemiga | ×0.7 | ×1 | ×1.45 |
-| Velocidad/cadencia de balas | menor | normal | mayor |
+| Vida enemiga | ×0.8 | ×1.15 | ×1.6 |
+| Velocidad/cadencia de balas | menor | mayor | mucho mayor |
+| Oleadas | más espaciadas | rápidas, a veces dobles | frenéticas |
+| Élites y disparos anticipados | pocos | frecuentes | muy frecuentes |
 | Escudo inicial | +1 | — | — |
 | Power-ups | más | normal | menos |
 | Puntos | ×0.7 | ×1 | ×1.6 |
@@ -87,7 +97,7 @@ En **⚙ Ajustes** se puede activar/desactivar y regular la música y los efecto
 ## Estructura
 - `www/index.html` + `www/js/` — el juego (HTML5 Canvas, sin dependencias):
   `core` (pantalla y utilidades), `sprites`, `background`, `audio` (efectos y música),
-  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `bosses` (los 10 jefes), `render` (dibujo y menús), `input` (controles y bucle).
+  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `bosses` (los 10 jefes), `chaos` (eventos, élites y combos), `render` (dibujo y menús), `input` (controles y bucle).
   Se puede abrir `www/index.html` directamente en un navegador para probarlo.
 - `android/` — app Android nativa (WebView a pantalla completa) que empaqueta `www/` como assets.
 - `.github/workflows/android.yml` — compila el APK automáticamente en GitHub Actions.

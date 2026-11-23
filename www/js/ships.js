@@ -104,7 +104,7 @@ function updateBeam(dt) {
     if (tgt && isBoss) hitBossBox(tgt, d, x, endY);
     else if (tgt) hitEnemy(tgt, d, x, endY);
   }
-  humCtl('pbeam', true, 220, 441, 0.035, 30, 2400);
+  humCtl('pbeam', true, 392, 588, 0.016, 3, 1500, ['sine', 'triangle']);
 }
 function drawBeam() {
   if (!BEAM) return;

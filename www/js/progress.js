@@ -115,7 +115,7 @@ function hurtPlayer() {
   }
   P.shield--; shake = 14; SFX.hurt(); vib(90);
   if (P.lvl > minLvl()) { P.lvl--; syncWeapon(); FT.push({ x: P.x, y: P.y - 60, t: 0, s: 'NIVEL ' + P.lvl, col: '#ff7a8a' }); }
-  P.xp = 0; P.inv = 2.2;
+  P.xp = 0; P.inv = D.inv; comboBreak();
   burst(P.x, P.y, 18, 'cyan', 260, 0.6, 1.1);
   if (P.shield > 0) return;
   if (P.revive) {
