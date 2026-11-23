@@ -52,14 +52,14 @@ function drawBoss(b) {
   if (b.kind === 'mothership') {
     drawSpr(SPR.boss, b.x, b.y);
     add();
-    drawSpr(b.rage ? GLOW.red : GLOW.mag, b.x, b.y, 0, (1.6 + Math.sin(G.t * 6) * 0.35) * 1.6);
-    for (const s of [-1, 1]) for (const ox of [110, 182]) drawSpr(GLOW.mag, b.x + s * ox, b.y - 82 - Math.random() * 6, 0, 1.2);
+    drawSpr(b.rage ? GLOW.orange : GLOW.red, b.x, b.y, 0, (1.4 + Math.sin(G.t * 6) * 0.35) * 1.6);
+    for (const s of [-1, 1]) for (const ox of [110, 182]) drawSpr(GLOW.red, b.x + s * ox, b.y - 74 - Math.random() * 6, 0, 1.2);
     norm();
     BT.forEach(([ox, oy], i) => drawSpr(SPR.turret, b.x + ox, b.y + oy, b.ta[i]));
     if (b.hit > 0) { ctx.globalAlpha = 0.22; drawSpr(FL.boss, b.x, b.y); ctx.globalAlpha = 1; }
   } else if (b.kind === 'colossus') {
     drawSpr(SPR.colossus, b.x, b.y);
-    add(); drawSpr(b.rage ? GLOW.red : GLOW.orange, b.x, b.y + 10, 0, 2.6 + Math.sin(G.t * 5) * 0.4); norm();
+    add(); drawSpr(b.rage ? GLOW.red : GLOW.mag, b.x, b.y + 10, 0, 2.6 + Math.sin(G.t * 5) * 0.4); norm();
     CT.forEach(([ox, oy], i) => drawSpr(SPR.bigTurret, b.x + ox, b.y + oy, b.ta[i]));
     if (b.hit > 0) { ctx.globalAlpha = 0.2; drawSpr(FL.colossus, b.x, b.y); ctx.globalAlpha = 1; }
   } else {

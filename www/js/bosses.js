@@ -302,13 +302,13 @@ const BOSS_DEFS = [
         }
       }
       for (const a of b.arms) {
-        ctx.strokeStyle = '#3a4252'; ctx.lineWidth = 18; ctx.beginPath(); ctx.moveTo(b.x + a.s * 95, b.y); ctx.lineTo(a.x, a.y - 20); ctx.stroke();
-        ctx.strokeStyle = '#ff5a1f'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.strokeStyle = '#4a3e5a'; ctx.lineWidth = 18; ctx.beginPath(); ctx.moveTo(b.x + a.s * 95, b.y); ctx.lineTo(a.x, a.y - 20); ctx.stroke();
+        ctx.strokeStyle = '#c86bff'; ctx.lineWidth = 2; ctx.stroke();
       }
       drawSpr(SPR.goliath, b.x, b.y);
       if (b.chest > 0) {
-        ctx.globalCompositeOperation = 'lighter'; drawSpr(GLOW.red, b.x, b.y + 20, 0, 2.6 + Math.sin(G.t * 20) * 0.4); ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = '#3a4252'; ctx.fillRect(b.x - 62, b.y - 10, 30, 60); ctx.fillRect(b.x + 32, b.y - 10, 30, 60);
+        ctx.globalCompositeOperation = 'lighter'; drawSpr(GLOW.purple, b.x, b.y + 20, 0, 2.6 + Math.sin(G.t * 20) * 0.4); ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'rgba(74,62,90,0)'; ctx.fillRect(b.x - 62, b.y - 10, 30, 60); ctx.fillRect(b.x + 32, b.y - 10, 30, 60);
       }
       flashFx(b, 0.18);
       for (const a of b.arms) {
@@ -349,12 +349,13 @@ const BOSS_DEFS = [
         const ax = b.x + s * 34 * sc, ay = b.y - 40 * sc + i * 28 * sc;
         const fx = b.x + s * (130 + Math.sin(i) * 10) * sc, fy = ay - 40 * sc + i * 12 * sc + Math.sin(b.t * 9 + i * 1.7 + s) * 14;
         const kx = (ax + fx) / 2 + s * 18 * sc, ky = (ay + fy) / 2 - 34 * sc;
-        ctx.strokeStyle = '#2a2f3c'; ctx.lineWidth = 9 * sc; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy); ctx.stroke();
-        ctx.strokeStyle = '#ff3355'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.strokeStyle = '#3a3036'; ctx.lineWidth = 10 * sc; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy); ctx.stroke();
+        ctx.strokeStyle = '#ff8a2b'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = '#e8dcc8'; ctx.beginPath(); ctx.arc(kx, ky, 4 * sc, 0, TAU); ctx.fill();
       }
       ctx.lineCap = 'butt';
       drawSpr(SPR.spider, b.x, b.y, 0, sc);
-      ctx.globalCompositeOperation = 'lighter'; drawSpr(GLOW.red, b.x, b.y - 52 * sc, 0, 2 + Math.sin(G.t * 5) * 0.4); ctx.globalCompositeOperation = 'source-over';
+      ctx.globalCompositeOperation = 'lighter'; drawSpr(GLOW.orange, b.x, b.y - 52 * sc, 0, 2 + Math.sin(G.t * 5) * 0.4); ctx.globalCompositeOperation = 'source-over';
       if (b.hit > 0) { ctx.globalAlpha = 0.2; drawSpr(FL.spider, b.x, b.y, 0, sc); ctx.globalAlpha = 1; }
     } },
 
@@ -468,7 +469,7 @@ const BOSS_DEFS = [
       const cols = { fire: '#ff8a2b', ice: '#9ae8ff', poison: '#6aff3a' };
       for (const h of b.heads) {
         const nx = b.x + (h.i - 1) * 60, ny = b.y + 30;
-        ctx.strokeStyle = '#1a4a44'; ctx.lineWidth = h.dead ? 14 : 22; ctx.lineCap = 'round';
+        ctx.strokeStyle = '#6a707c'; ctx.lineWidth = h.dead ? 14 : 22; ctx.lineCap = 'round';
         ctx.beginPath(); ctx.moveTo(nx, ny);
         const ex = h.dead ? nx + (h.x - nx) * 0.35 : h.x, ey = h.dead ? ny + (h.y - ny) * 0.35 : h.y - 20;
         ctx.quadraticCurveTo(nx + (h.i - 1) * 30, ny + 60, ex, ey); ctx.stroke();
@@ -536,7 +537,7 @@ const BOSS_DEFS = [
         ctx.globalAlpha = 1;
       }
       ctx.globalAlpha = b.alpha; drawSpr(SPR.phantom, b.x, b.y);
-      ctx.globalCompositeOperation = 'lighter'; drawSpr(GLOW.cyan, b.x, b.y + 10, 0, 1.6 * b.alpha); ctx.globalCompositeOperation = 'source-over';
+      ctx.globalCompositeOperation = 'lighter'; drawSpr(GLOW.purple, b.x, b.y + 10, 0, 1.6 * b.alpha); ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;
       if (b.cloak && Math.random() < 0.3) { ctx.strokeStyle = 'rgba(0,229,255,0.25)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(b.x, b.y, 120, 60, 0, 0, TAU); ctx.stroke(); }
       if (!b.cloak) flashFx(b, 0.3);
