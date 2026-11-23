@@ -90,17 +90,18 @@ function updateBeam(dt) {
     if (e.dead || e.delay > 0 || e.y > y0 || e.y < -20) continue;
     if (Math.abs(e.x - x) < e.r + w && e.y > endY) { endY = e.y; tgt = e; isBoss = false; }
   }
-  if (boss && !boss.dying && !boss.enter) for (const [bx, by, r, m] of bossBoxes(boss)) {
+  if (boss && !boss.dying && !boss.enter) for (const box of bossBoxes(boss)) {
+    const [bx, by, r] = box;
     if (by > y0 || Math.abs(bx - x) > r + w) continue;
     const yy = by + Math.sqrt(Math.max(0, r * r - (bx - x) ** 2)) * 0.8;
-    if (yy > endY) { endY = yy; tgt = m; isBoss = true; }
+    if (yy > endY) { endY = yy; tgt = box; isBoss = true; }
   }
   BEAM = { x, y0, y1: endY, w };
   P.fireT -= dt;
   if (P.fireT <= 0) {
     P.fireT = SHIP.rate * lvlRate() * (P.buf.hyper > 0 ? 0.5 : 1);
     const d = SHIP.dmg * lvlDmg() * (1 + 0.3 * (P.wl - 1));
-    if (tgt && isBoss) damageBoss(d * tgt, x, endY);
+    if (tgt && isBoss) hitBossBox(tgt, d, x, endY);
     else if (tgt) hitEnemy(tgt, d, x, endY);
   }
   humCtl('pbeam', true, 220, 441, 0.035, 30, 2400);
@@ -124,7 +125,7 @@ function gainUlt(v) {
   if (P.ult >= 100) { FT.push({ x: W / 2, y: H * 0.62, t: 0, s: '¡ULTRA LISTO!', big: true, col: SHIP.col }); SFX.ultReady(); }
 }
 function hurtEnemyQuiet(e, d) { if (e.dead || e.delay > 0) return; e.hp -= d; e.hit = 0.05; if (e.hp <= 0) hitEnemy(e, 0, e.x, e.y); }
-function hurtBossQuiet(d) { if (!boss || boss.dying || boss.enter) return; boss.hp -= d; boss.hit = 0.05; if (boss.hp <= 0) damageBoss(0, boss.x, boss.y); }
+function hurtBossQuiet(d) { if (!boss || boss.dying || boss.enter) return; damageBoss(d, boss.x, boss.y, true); }
 function nearBoss(x, y, pad) { if (!boss || boss.dying || boss.enter) return false; return bossBoxes(boss).some(([bx, by, r]) => Math.hypot(bx - x, by - y) < r + pad); }
 
 /* ---------------- Ataques definitivos ---------------- */

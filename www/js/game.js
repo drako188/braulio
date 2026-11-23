@@ -19,11 +19,6 @@ const DIFFS = [
   { id: 'normal', name: 'INTERMEDIO', col: '#00e5ff', hp: 1, bullet: 1, fire: 1, armor: 0, score: 1, spawn: 1, drop: 1 },
   { id: 'hard', name: 'DIFÍCIL', col: '#ff3355', hp: 1.45, bullet: 1.2, fire: 1.35, armor: 0, score: 1.6, spawn: 0.82, drop: 0.7 }
 ];
-const BOSSES = [
-  { kind: 'mothership', name: 'NAVE NODRIZA' },
-  { kind: 'colossus', name: 'COLOSO BLINDADO' },
-  { kind: 'vroar', name: 'VROAR' }
-];
 let selShip = 0, selDiff = 1;
 try {
   selShip = clamp(parseInt(localStorage.getItem('ns_ship') || '0', 10) || 0, 0, SHIPS.length - 1);
@@ -54,8 +49,8 @@ function showBanner() { banner = { t: 0, a: 'SECTOR ' + level, b: SECTORS[(level
 const aim = (x, y) => Math.atan2(P.y - y, P.x - x);
 const bspd = () => Math.min(360, (175 + level * 18) * D.bullet);
 const cd = s => s / D.fire;
-function eShot(x, y, a, spd, big = false) {
-  SFX.eshot(x, big); eB.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: big ? 8 : 6, big }); }
+function eShot(x, y, a, spd, big = false, k = null) {
+  SFX.eshot(x, big); eB.push({ x, y, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: big || k === 'ice' || k === 'web' ? 8 : 6, big, k }); }
 function addScore(pts, x, y, big) {
   const v = Math.round(pts * D.score * scoreMult()); score += v;
   FT.push({ x, y, t: 0, s: '+' + v, big: !!big });
@@ -111,8 +106,8 @@ function nearestEnemy(x, y) {
   let best = null, bd = 1e12;
   for (const e of EN) { if (e.dead || e.delay > 0 || e.y < 10) continue; const d = (e.x - x) ** 2 + (e.y - y) ** 2; if (d < bd) { bd = d; best = e; } }
   if (boss && !boss.dying && boss.y > 0) {
-    const t = boss.kind === 'vroar' ? boss.head : boss;
-    const d = (t.x - x) ** 2 + (t.y - y) ** 2; if (d < bd) best = t;
+    const [tx, ty] = bossCenter(); const t = { x: tx, y: ty };
+    const d = (t.x - x) ** 2 + (t.y - y) ** 2; if (d < bd && !boss.cloak) best = t;
   }
   return best;
 }
@@ -166,7 +161,7 @@ const WAVES = [
 function spawner(dt) {
   const bossAt = 60 + level * 5;
   if (G.phase === 'waves') {
-    if (stageT > bossAt) { G.phase = 'warn'; warnT = 3.4; SFX.warn(); setMusic('warn'); return; }
+    if (stageT > bossAt) { G.phase = 'warn'; warnT = 4.6; SFX.warn(); setMusic('warn'); return; }
     if (stageT > bossAt - 4) return;
     waveT -= dt;
     if (waveT <= 0 && EN.length < 18) {
@@ -288,60 +283,6 @@ const BH = [[0, 0, 60], [-60, 20, 45], [60, 20, 45], [-145, -5, 45], [145, -5, 4
 const CT = [[-100, -40], [100, -40]];
 const CH_BOX = [[0, 10, 70], [-100, -40, 50], [100, -40, 50], [-180, 0, 42], [180, 0, 42], [0, 100, 45], [-110, 80, 45], [110, 80, 45]];
 const VSEG = 14, VGAP = 9;
-function nextBoss() { return BOSSES[(level - 1) % BOSSES.length]; }
-function spawnBoss() {
-  const B = nextBoss(), base = { mothership: 650, colossus: 900, vroar: 800 }[B.kind];
-  const hp = Math.round(base * (1 + 0.6 * (level - 1)) * D.hp);
-  boss = { kind: B.kind, name: B.name, x: W / 2, y: -170, hp, maxhp: hp, t: 0, hit: 0, enter: true, a1: 1, a2: 0, a3: 0, spin: 0, dying: 0,
-    ta: [Math.PI / 2, Math.PI / 2, Math.PI / 2, Math.PI / 2], rage: false };
-  if (B.kind === 'colossus') boss.y = -200;
-  if (B.kind === 'vroar') {
-    boss.head = { x: W / 2, y: -80, rot: 0 }; boss.pt = 0; boss.bt = 0; boss.breath = 0;
-    boss.hist = []; for (let k = 0; k <= VSEG * VGAP + 2; k++) boss.hist.push({ x: W / 2, y: -80 - k * 4 });
-    boss.segs = []; for (let i = 0; i < VSEG; i++) boss.segs.push({ x: W / 2, y: -120 - i * 36, rot: 0 });
-  }
-  G.phase = 'boss'; setMusic('boss', (level - 1) % BOSSES.length);
-}
-function bossBoxes(b) {
-  if (b.kind === 'mothership') return BH.map(([ox, oy, r]) => [b.x + ox, b.y + oy, r, 1]);
-  if (b.kind === 'colossus') return CH_BOX.map(([ox, oy, r]) => [b.x + ox, b.y + oy, r, 1]);
-  const out = [[b.head.x, b.head.y, 44, 1]];
-  for (const s of b.segs) out.push([s.x, s.y, 24, 0.35]);
-  return out;
-}
-function damageBoss(d, x, y) {
-  gainUlt(d * 0.05);
-  boss.hp -= d; boss.hit = 0.05; burst(x, y, 3, 'mag', 150, 0.25, 0.5); SFX.hit(x);
-  if (boss.hp <= 0 && !boss.dying) { boss.dying = 0.001; SFX.bossDie(); vib(300); setMusic('victory', level + 1); eB.length = 0; LASERS = []; addScore(10000 * level, boss.kind === 'vroar' ? boss.head.x : boss.x, (boss.kind === 'vroar' ? boss.head.y : boss.y), true); }
-}
-function bossDeathFx(b) {
-  if (b.kind === 'vroar') { const s = pick(b.segs.concat([b.head])); explode(s.x + rand(-20, 20), s.y + rand(-20, 20), rand(0.8, 1.5)); }
-  else explode(b.x + rand(-200, 200), b.y + rand(-100, 100), rand(0.8, 1.6));
-}
-function updateBoss(dt) {
-  const b = boss; b.t += dt; b.hit = Math.max(0, b.hit - dt);
-  if (b.dying) {
-    b.dying += dt; if (b.kind !== 'vroar') b.y += 22 * dt;
-    if (Math.random() < dt * 16) bossDeathFx(b);
-    if (b.dying > 2.4) {
-      const cx = b.kind === 'vroar' ? b.head.x : b.x, cy = b.kind === 'vroar' ? b.head.y : b.y;
-      explode(cx, cy, 5); explode(cx - 120, cy, 3); explode(cx + 120, cy, 3); flash = 1; shake = 24;
-      if (b.kind === 'colossus') marks.push({ x: b.x, y: b.y, s: 4 });
-      dropXP(cx, cy, 60);
-      for (const [t, dx] of [['P', -70], ['V', 0], ['S', 70]]) PU.push({ x: clamp(cx + dx, 40, W - 40), y: clamp(cy, 80, H * 0.6), t, tt: 0 });
-      boss = null; level++; stageT = 0; waveT = 4; G.phase = 'waves'; showBanner();
-    }
-    return;
-  }
-  b.rage = b.hp < b.maxhp * 0.5;
-  if (b.kind === 'mothership') updateMothership(b, dt);
-  else if (b.kind === 'colossus') updateColossus(b, dt);
-  else updateVroar(b, dt);
-  if (b.rage && Math.random() < dt * 6) {
-    const [x, y] = b.kind === 'vroar' ? [b.head.x, b.head.y] : [b.x + rand(-150, 150), b.y + rand(-60, 60)];
-    PA.push({ x, y, vx: rand(-15, 15), vy: rand(-40, -10), life: 1, max: 1, s: 1.4, smoke: true });
-  }
-}
 function updateMothership(b, dt) {
   if (b.enter) { b.y += 85 * dt; if (b.y >= 190) { b.y = 190; b.enter = false; b.t = 0; } return; }
   b.x = W / 2 + Math.sin(b.t * 0.45) * 45; b.y = 190 + Math.sin(b.t * 0.8) * 18;
@@ -485,7 +426,7 @@ function update(dt) {
   if (P.alive) {
     const kx = (keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA ? 1 : 0);
     const ky = (keys.ArrowDown || keys.KeyS ? 1 : 0) - (keys.ArrowUp || keys.KeyW ? 1 : 0);
-    const sp = 760 * SHIP.speed;
+    const sp = 760 * SHIP.speed * (P.webT > 0 ? 0.42 : 1);
     if (kx || ky) { P.tx = P.x + kx * sp * 0.1; P.ty = P.y + ky * sp * 0.1; }
     P.tx = clamp(P.tx, 26, W - 26); P.ty = clamp(P.ty, 70, H - 50);
     const dx = P.tx - P.x, dy = P.ty - P.y, d = Math.hypot(dx, dy), m = sp * dt;
@@ -556,9 +497,9 @@ function collisions() {
       }
     }
     if (!b.dead && boss && !boss.dying && !boss.enter) {
-      for (const [bx, by, r, m] of bossBoxes(boss)) {
-        const dx = bx - b.x, dy = by - b.y, rr = r + b.r;
-        if (dx * dx + dy * dy < rr * rr) { b.dead = true; damageBoss(b.dmg * m, b.x, b.y); break; }
+      for (const box of bossBoxes(boss)) {
+        const [bx, by, r] = box, dx = bx - b.x, dy = by - b.y, rr = r + b.r;
+        if (dx * dx + dy * dy < rr * rr) { b.dead = true; hitBossBox(box, b.dmg, b.x, b.y); break; }
       }
     }
   }
@@ -566,14 +507,14 @@ function collisions() {
   if (P.inv <= 0) {
     for (const b of eB) {
       const dx = b.x - P.x, dy = b.y - P.y, rr = b.r + P.r;
-      if (dx * dx + dy * dy < rr * rr) { b.dead = true; hurtPlayer(); break; }
+      if (dx * dx + dy * dy < rr * rr) { b.dead = true; if (b.k === 'web') { P.webT = 2.6; FT.push({ x: P.x, y: P.y - 50, t: 0, s: '¡ATRAPADO!', col: '#ffffff' }); SFX.barrier(); } else hurtPlayer(); break; }
     }
     for (const e of EN) {
       if (e.dead || e.delay > 0 || e.ground) continue;
       const dx = e.x - P.x, dy = e.y - P.y, rr = e.r * 0.75 + P.r + 5;
       if (dx * dx + dy * dy < rr * rr) { hitEnemy(e, e.type === 'kamikaze' || e.type === 'mine' ? 99 : 10, e.x, e.y); hurtPlayer(); break; }
     }
-    if (boss && !boss.dying && boss.kind !== 'colossus') for (const [bx, by, r] of bossBoxes(boss)) {
+    if (boss && !boss.dying && !boss.enter && !bossDef().ground && !boss.cloak) for (const [bx, by, r] of bossBoxes(boss)) {
       const dx = bx - P.x, dy = by - P.y, rr = r * 0.8 + P.r + 3;
       if (dx * dx + dy * dy < rr * rr) { hurtPlayer(); break; }
     }

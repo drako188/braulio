@@ -58,12 +58,25 @@ el botón **ULTRA** brilla: tócalo para lanzar el ataque definitivo de tu nave.
 Drones, cazas en picado, cazas interceptores laterales, kamikazes, minas (estallan en balas),
 giro-drones, cruceros, bombarderos pesados y **tanques terrestres** con torreta giratoria.
 
-### Jefes finales (rotan cada sector)
-1. **Nave Nodriza**: torretas, espirales y anillos de balas.
-2. **Coloso Blindado**: fortaleza terrestre con cañones dobles y **rayos láser** (aviso rojo antes de disparar).
-3. **VROAR**: serpiente mecánica de 14 segmentos. Su cabeza recibe todo el daño y su rugido anuncia un aliento de fuego.
+### Jefes finales (10, uno por sector)
+Antes de cada jefe aparece una ficha con su **virtud** y su **debilidad**. Los puntos débiles se marcan con una mira dorada;
+los impactos críticos muestran el multiplicador (×2, ×3…) y los disparos bloqueados hacen un "tink".
 
-Al bajar del 50 % de vida, cada jefe entra en modo furia.
+| # | Jefe | Virtud | Debilidad | Especial |
+|---|---|---|---|---|
+| 1 | **Nave Nodriza** | Torretas 360° y drones de refuerzo | Núcleo central ×2 | Andanada en espiral |
+| 2 | **Coloso Blindado** | Orugas y torretas reciben 50 % de daño | Reactor central ×2 | Láseres barredores |
+| 3 | **VROAR** | 14 segmentos acorazados (35 % de daño) | Cabeza ×1,5 | Rugido y aliento de fuego |
+| 4 | **Colmena** | Núcleo blindado mientras vivan sus 3 incubadoras; genera enjambres | Sin incubadoras, núcleo ×1,6 | Enjambre furioso de kamikazes |
+| 5 | **Goliat** | Torso blindado y puños que bloquean disparos | Al cargar un puñetazo abre el pecho: ×3 | Puñetazo sísmico (onda de balas) |
+| 6 | **Arácnido** | Muy rápido, te persigue y salta | Abdomen trasero ×2 (atácalo por los lados) | Telaraña que te deja lento |
+| 7 | **Tormenta** | Escudo eléctrico: invulnerable a ratos | Tras los rayos se sobrecarga: ×2 | Rayos en columna (aviso amarillo) |
+| 8 | **Hidra** | 3 cabezas que se regeneran a los 14 s | Cada cabeza cortada: las demás +50 % de daño | Triple aliento: fuego, hielo y veneno |
+| 9 | **Fantasma** | Invisible, se teletransporta y crea señuelos | Visible recibe ×1,5; señuelos frágiles | Guadaña fantasma |
+| 10 | **Núcleo Omega** | 4 escudos orbitales que bloquean · 3 fases | Fase final sin escudos: ×1,5 | Colapso: atrae tu nave al núcleo |
+
+Al vencer al Núcleo Omega empieza el **Ciclo 2**: los 10 jefes vuelven con más vida.
+Cada jefe tiene su propio tema musical y entra en modo furia al bajar del 50 % de vida.
 
 ### Sonido y música
 Música synthwave generada en tiempo real: tema de menú, tema de combate que se intensifica con el sector,
@@ -74,7 +87,7 @@ En **⚙ Ajustes** se puede activar/desactivar y regular la música y los efecto
 ## Estructura
 - `www/index.html` + `www/js/` — el juego (HTML5 Canvas, sin dependencias):
   `core` (pantalla y utilidades), `sprites`, `background`, `audio` (efectos y música),
-  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `render` (dibujo y menús), `input` (controles y bucle).
+  `game` (lógica), `progress` (niveles, vidas y power-ups), `ships` (naves extra y ataques ULTRA), `bosses` (los 10 jefes), `render` (dibujo y menús), `input` (controles y bucle).
   Se puede abrir `www/index.html` directamente en un navegador para probarlo.
 - `android/` — app Android nativa (WebView a pantalla completa) que empaqueta `www/` como assets.
 - `.github/workflows/android.yml` — compila el APK automáticamente en GitHub Actions.

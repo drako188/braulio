@@ -160,7 +160,7 @@ function collectPU(u) {
 }
 function updateBuffs(dt) {
   for (const k in P.buf) P.buf[k] = Math.max(0, P.buf[k] - dt);
-  P.lvlFx = Math.max(0, P.lvlFx - dt);
+  P.lvlFx = Math.max(0, P.lvlFx - dt); P.webT = Math.max(0, (P.webT || 0) - dt);
   // drones escolta
   const own = SHIP.id === 'sentinel';
   if ((P.buf.drone > 0 || own) && P.alive) {
@@ -194,6 +194,7 @@ function drawPlayerFx() {
     ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
     if (P.lvl >= 7 && Math.random() < 0.5) PA.push({ x: P.x + rand(-40, 40), y: P.y + 30, vx: 0, vy: 120, life: 0.35, max: 0.35, s: 0.4, c: gold ? 'amber' : 'white' });
   }
+  if (P.webT > 0) { ctx.globalAlpha = Math.min(1, P.webT); drawSpr(SPR.eo_web, P.x, P.y, G.t, 3.2); ctx.globalAlpha = 1; }
   if (P.barrier > 0) {
     ctx.strokeStyle = 'rgba(127,246,255,0.75)'; ctx.lineWidth = 2 + P.barrier;
     ctx.beginPath(); ctx.arc(P.x, P.y, 48, 0, TAU); ctx.stroke();

@@ -95,12 +95,11 @@ function drawLasers() {
 function drawWorld() {
   // capa terrestre
   for (const e of EN) if (e.ground && e.delay <= 0) drawEnemy(e);
-  if (boss && boss.kind === 'colossus') drawBoss(boss);
+  if (boss && bossDef().ground) drawBossAny(boss);
   drawClouds();
   // sombras de unidades aéreas
   for (const e of EN) if (!e.ground && e.delay <= 0) drawSpr(SHD[e.type], e.x + 20, e.y + 34, (e.type === 'fighter' || e.type === 'kamikaze' || e.type === 'hunter') ? e.rot : 0, 0.8);
-  if (boss && boss.kind === 'mothership') drawSpr(SHD.boss, boss.x + 30, boss.y + 50, 0, 0.85);
-  if (boss && boss.kind === 'vroar') { for (const s of boss.segs) drawSpr(SHD.vseg, s.x + 24, s.y + 40, s.rot, 0.8); drawSpr(SHD.vhead, boss.head.x + 24, boss.head.y + 40, boss.head.rot, 0.8); }
+  if (boss && bossDef().shadow) bossDef().shadow(boss);
   if (P.alive) { ctx.save(); ctx.translate(P.x + 22, P.y + 40); ctx.scale((1 - Math.abs(P.bank) * 0.2) * 0.8, 0.8); const s = SHD[SHIP.id]; ctx.drawImage(s, -s.w / 2, -s.h / 2, s.w, s.h); ctx.restore(); }
   // power-ups
   for (const u of PU) {
@@ -110,7 +109,7 @@ function drawWorld() {
   }
   drawXP();
   for (const e of EN) if (!e.ground && e.delay <= 0) drawEnemy(e);
-  if (boss && boss.kind !== 'colossus') drawBoss(boss);
+  if (boss && !bossDef().ground) drawBossAny(boss);
   ctx.globalCompositeOperation = 'lighter';
   for (const b of pB) {
     if (b.grow) { const k = b.life / b.max; ctx.globalAlpha = Math.min(1, k + 0.25); drawSpr(b.spr, b.x, b.y, 0, 0.5 + (1 - k) * 1.7); ctx.globalAlpha = 1; }
@@ -139,7 +138,7 @@ function drawWorld() {
   ctx.globalCompositeOperation = 'source-over';
   drawLasers();
   const pulse = 1 + Math.sin(G.t * 14) * 0.1;
-  for (const b of eB) drawSpr(b.big ? SPR.eorb2 : SPR.eorb, b.x, b.y, 0, pulse);
+  for (const b of eB) drawSpr(b.k ? SPR['eo_' + b.k] : b.big ? SPR.eorb2 : SPR.eorb, b.x, b.y, b.k === 'web' ? G.t * 3 : 0, pulse);
   for (const f of FT) {
     const dur = f.big ? 1.6 : 0.8, a = 1 - f.t / dur;
     ctx.globalAlpha = a; txt(f.s, f.x, f.y - f.t * 40, f.big ? 30 : 14, f.col || '#ffffff', 'center', f.big ? (f.col || '#ff2bd6') : null, 900);
@@ -227,12 +226,8 @@ function drawHUD() {
     txt(banner.b, W / 2, H * 0.38 + 26, 18, '#ff9af0', 'center', null, 700);
     ctx.globalAlpha = 1;
   }
-  if (G.phase === 'warn') {
-    const on = Math.floor(G.t * 4) % 2 === 0;
-    ctx.fillStyle = on ? 'rgba(255,0,50,0.25)' : 'rgba(255,0,50,0.08)'; ctx.fillRect(0, H * 0.4 - 45, W, 90);
-    txt('⚠  ALERTA  ⚠', W / 2, H * 0.4 - 12, 38, '#ff3355', 'center', '#ff0033', 900);
-    txt(nextBoss().name + ' SE APROXIMA', W / 2, H * 0.4 + 24, 16, '#ffc0cc', 'center', null, 700);
-  }
+  if (G.phase === 'warn') drawBossIntro();
+
 }
 function menuLayout() {
   return {

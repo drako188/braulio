@@ -108,6 +108,7 @@ const SFX = {
   barrier() { tone(900, 0.25, 'sine', 0.1, 300); noise(0.2, 0.08, 6000, 0, 0, 'bandpass', 2000, 3); },
   ultra() { tone(120, 1.2, 'sawtooth', 0.12, 900, 0, 0, 0.1); tone(240, 1.0, 'square', 0.05, 1800, 0, 0, 0.3); noise(1.2, 0.3, 3000, 0.15, 0, 'lowpass', 60); tone(55, 1.2, 'sine', 0.35, 30, 0.15); },
   ultReady() { [660, 880, 1320].forEach((f, i) => tone(f, 0.2, 'triangle', 0.09, 0, i * 0.08)); },
+  tink(x = W / 2) { if (throttle('tk', 80)) { tone(2400, 0.05, 'triangle', 0.03, 1800, 0, panX(x)); tone(3600, 0.04, 'sine', 0.02, 0, 0, panX(x)); } },
   ui() { tone(1200, 0.05, 'triangle', 0.06, 1800); }
 };
 
