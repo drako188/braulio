@@ -453,10 +453,9 @@ const BOSS_DEFS = [
       out.push([b.x, b.y, 90, 0]);
       return out;
     },
-    damage(b, d) { const al = b.heads.filter(h => !h.dead); for (const h of al) { h.hp -= d / al.length; h.hit = 0.06; if (h.hp <= 0) this.partDead(b, h); } },
+    damage(b, d) { const al = b.heads.filter(h => !h.dead); for (const h of al) { h.hp -= d / al.length; h.hit = 0.06; if (h.hp <= 0 && !h.dead) this.partDead(b, h); } },
     partHit(b, h) { },
     partDead(b, h) {
-      if (h.dead) return;
       h.dead = true; h.hp = 0; h.regen = 14; explode(h.x, h.y, 2);
       b.hp = b.heads.reduce((s, q) => s + (q.dead ? 0 : Math.max(0, q.hp)), 0);
       if (b.heads.some(q => !q.dead)) FT.push({ x: h.x, y: h.y - 40, t: 0, s: 'CABEZA CORTADA', col: '#2bf0c0' });
@@ -662,6 +661,7 @@ function updateBoss(dt) {
   }
   b.rage = b.hp < b.maxhp * 0.5;
   Df.update(b, dt);
+  if (b.hp <= 0 && !b.enter) checkBossDeath();
   if (b.rage && Math.random() < dt * 6) PA.push({ x: cx + rand(-Df.size[0] / 3, Df.size[0] / 3), y: cy + rand(-40, 40), vx: rand(-15, 15), vy: rand(-40, -10), life: 1, max: 1, s: 1.4, smoke: true });
 }
 function drawBossAny(b) {
