@@ -114,7 +114,7 @@ function drawBG() {
   drawSeams();
   for (const m of marks) drawSpr(SPR.scorch, m.x, m.y, 0, m.s);
   ctx.globalCompositeOperation = 'lighter';
-  for (const t of tiles) for (const b of t.img.beacons) {
+  if (Q().fx) for (const t of tiles) for (const b of t.img.beacons) {
     const a = 0.5 + 0.5 * Math.sin(G.t * 3 + b.ph);
     if (a < 0.15) continue;
     ctx.globalAlpha = a; drawSpr(GLOW[BEACON_GLOW[b.c] || 'white'], b.x, t.y + b.y, 0, 0.8);
@@ -125,7 +125,7 @@ function drawBG() {
     drawSpr(down ? GLOW.white : GLOW.red, c.x, c.y + (down ? 9 : -9), 0, 0.45);
     drawSpr(down ? GLOW.red : GLOW.white, c.x, c.y + (down ? -9 : 9), 0, 0.3);
   }
-  for (const l of lights) {
+  if (Q().fx) for (const l of lights) {
     ctx.save(); ctx.translate(l.x, l.y); ctx.rotate(l.a0 + Math.sin(G.t * l.sp + l.ph) * 0.7);
     ctx.drawImage(SPR.beam, -45, -320, 90, 320); ctx.restore();
     drawSpr(GLOW.white, l.x, l.y, 0, 0.6);

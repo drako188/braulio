@@ -259,7 +259,7 @@ function updateAmbient(dt) {
   const T = THEMES[THEME], kind = T.amb;
   if (kind) {
     const rate = { stars: 30, ash: 14, sand: 18, embers: 16, spores: 8, rain: 60, flies: 6, snow: 26, data: 14 }[kind];
-    let n = rate * dt; while (n > 0) { if (Math.random() < n) spawnAmb(kind); n--; }
+    let n = rate * dt * Q().amb; while (n > 0) { if (Math.random() < n) spawnAmb(kind); n--; }
   }
   for (const a of AMB) { a.t += dt; a.x += a.vx * dt; a.y += a.vy * dt; if (a.k === 'flies' || a.k === 'spores') { a.x += Math.sin(a.t * 2 + a.ph) * 20 * dt; } }
   for (let i = AMB.length - 1; i >= 0; i--) { const a = AMB[i]; if (a.y > H + 20 || a.y < -40 || a.x < -40 || a.x > W + 40 || a.t > a.life) AMB.splice(i, 1); }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  IDENTIFICADORES DE PUBLICIDAD (AdMob)
+  Ahora mismo son los IDs de PRUEBA oficiales de Google: muestran anuncios de prueba y no generan dinero.
+  Cuando tengas tu cuenta de AdMob, reemplaza estos tres valores por los tuyos (ver PUBLICAR.md).
+-->
+<resources>
+    <string name="admob_app_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="ad_rewarded" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
+    <string name="ad_interstitial" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
+</resources>

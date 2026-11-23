@@ -31,6 +31,7 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setAllowFileAccess(true);
         web.setWebViewClient(new WebViewClient());
+        web.addJavascriptInterface(new Monetization(this, web), "NSNative");
         setContentView(web);
         hideSystemUI();
         web.loadUrl("file:///android_asset/index.html");

@@ -2,7 +2,7 @@
 /* ---------------- Render ---------------- */
 function txt(s, x, y, size, col, align = 'center', glow = null, weight = 800) {
   ctx.font = `${weight} ${size}px ${FONT}`; ctx.textAlign = align; ctx.textBaseline = 'middle';
-  if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = 14; }
+  if (glow && Q().fx) { ctx.shadowColor = glow; ctx.shadowBlur = 14; }
   ctx.fillStyle = col; ctx.fillText(s, x, y); ctx.shadowBlur = 0;
 }
 function drawShip(S, x, y, sc, bank, blink) {
@@ -161,22 +161,22 @@ function drawGear() {
   if (!SET.music && !SET.sfx) { ctx.strokeStyle = '#ff3355'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(x - 13, y + 13); ctx.lineTo(x + 13, y - 13); ctx.stroke(); }
 }
 function settingsLayout() {
-  const y0 = H * 0.27, rows = [];
-  for (let i = 0; i < 4; i++) {
-    const y = y0 + i * 90;
+  const y0 = H * 0.24, rows = [];
+  for (let i = 0; i < 5; i++) {
+    const y = y0 + i * 80;
     rows.push({ y, tog: { x: W - 140, y: y - 22, w: 104, h: 44 }, minus: { x: 36, y: y + 30, w: 44, h: 40 }, plus: { x: W - 80, y: y + 30, w: 44, h: 40 } });
   }
-  return { rows, back: { x: W / 2 - 130, y: y0 + 4 * 90 + 10, w: 260, h: 56 } };
+  return { rows, back: { x: W / 2 - 130, y: y0 + 5 * 80 + 4, w: 260, h: 56 } };
 }
 function drawSettings() {
   ctx.fillStyle = 'rgba(2,4,12,0.93)'; ctx.fillRect(0, 0, W, H);
   txt('AJUSTES', W / 2, H * 0.17, 44, '#ffffff', 'center', '#00e5ff', 900);
   const L = settingsLayout();
-  const items = [['MÚSICA', 'music', 'musicVol', '#ff2bd6'], ['EFECTOS', 'sfx', 'sfxVol', '#00e5ff'], ['VIBRACIÓN', 'vib', null, '#ffb800'], ['HISTORIA', 'story', null, '#39ff88']];
+  const items = [['MÚSICA', 'music', 'musicVol', '#ff2bd6'], ['EFECTOS', 'sfx', 'sfxVol', '#00e5ff'], ['VIBRACIÓN', 'vib', null, '#ffb800'], ['HISTORIA', 'story', null, '#39ff88'], ['GRÁFICOS', 'quality', null, '#c86bff']];
   items.forEach(([name, key, vk, col], i) => {
     const r = L.rows[i];
     txt(name, 40, r.y, 22, '#ffffff', 'left', null, 900);
-    btn(r.tog, SET[key] ? 'SÍ' : 'NO', col, SET[key], 18);
+    if (key === 'quality') btn(r.tog, QNAME[SET.quality], col, true, 16); else btn(r.tog, SET[key] ? 'SÍ' : 'NO', col, SET[key], 18);
     if (vk) {
       btn(r.minus, '−', col, false, 24); btn(r.plus, '+', col, false, 24);
       const bx = 92, bw = W - 184, v = SET[vk];
@@ -208,7 +208,7 @@ function drawHUD() {
     ctx.fillStyle = i < P.shield ? '#39ff88' : 'rgba(57,255,136,0.12)'; ctx.fill();
     ctx.strokeStyle = 'rgba(57,255,136,0.7)'; ctx.lineWidth = 1.5; ctx.stroke();
   }
-  drawProgressHUD(); drawUltBtn(); drawCombo(); drawAmbushWarn(); drawRadio();
+  drawProgressHUD(); drawUltBtn(); drawCombo(); drawAmbushWarn(); drawRadio(); drawTut();
   const bx = UI.bomb[0], by = H - 74;
   ctx.fillStyle = P.bombs > 0 ? 'rgba(255,120,30,0.18)' : 'rgba(80,80,80,0.2)'; ctx.beginPath(); ctx.arc(bx, by, 40, 0, TAU); ctx.fill();
   ctx.strokeStyle = P.bombs > 0 ? '#ff8a2b' : '#555'; ctx.lineWidth = 3; ctx.stroke();
@@ -273,8 +273,9 @@ function drawMenu() {
     for (let k = 0; k < 10; k++) { ctx.fillStyle = k < v ? S.col : 'rgba(255,255,255,0.07)'; ctx.fillRect(167 + k * 26, y - 5, 22, 10); }
   });
   wrapText(S.desc, W / 2, H * 0.625 + 4 * 25 + 6, W - 70, 19, 14, '#c8d4e6');
-  drawMenuButtons(); drawAchButton();
-  txt('RÉCORD ' + DIFFS[selDiff].name + '  ' + getHi(selDiff), W / 2, H * 0.94, 15, '#ffcf6a', 'center', null, 800);
+  drawMenuButtons(); drawAchButton(); drawStoreButton();
+  if (SAVE.cp) { const c = SAVE.cp, sh = SHIPS.find(s => s.id === c.ship); btn(CONT_BTN(), '▶ CONTINUAR · SECTOR ' + c.level + ' · ' + (sh ? sh.name : ''), '#39ff88', true, 15); }
+  else txt('RÉCORD ' + DIFFS[selDiff].name + '  ' + getHi(selDiff), W / 2, H * 0.94, 15, '#ffcf6a', 'center', null, 800);
   drawGear();
 }
 function pauseLayout() { return { cont: { x: W / 2 - 130, y: H * 0.5, w: 260, h: 56 }, menu: { x: W / 2 - 130, y: H * 0.5 + 76, w: 260, h: 56 } }; }
@@ -289,8 +290,8 @@ function drawOver() {
   txt(newRecord ? '¡NUEVO RÉCORD!' : 'RÉCORD  ' + hi, W / 2, H * 0.5 + 84, 20, '#ffcf6a', 'center', newRecord ? '#ffb800' : null, 800);
   txt(SHIP.name + ' · ' + D.name + ' · Sector ' + level, W / 2, H * 0.5 + 116, 16, '#b8c8e0', 'center', null, 600);
   txt('+' + coinLabel(runCoins) + ' monedas  ·  total ' + coinLabel(SAVE.coins), W / 2, H * 0.5 + 146, 16, '#ffd23f', 'center', null, 800);
-  if (overT > 1 && Math.floor(G.t * 2) % 2 === 0) txt('TOCA PARA CONTINUAR', W / 2, H * 0.78, 24, '#ffffff', 'center', '#00e5ff', 900);
   ctx.globalAlpha = 1;
+  drawOverButtons();
 }
 function render() {
   const k = VS * DPR;
@@ -298,7 +299,7 @@ function render() {
   const sx = shake > 0 ? rand(-shake, shake) * 0.5 : 0, sy = shake > 0 ? rand(-shake, shake) * 0.5 : 0;
   ctx.setTransform(k, 0, 0, k, sx * k, sy * k);
   drawBG();
-  const under = G.state === 'settings' ? G.prev : G.state, menuLike = under === 'menu' || under === 'hangar' || under === 'achievements';
+  const under = G.state === 'settings' ? G.prev : G.state === 'ad' ? FAKEAD.prev : G.state, menuLike = under === 'menu' || under === 'hangar' || under === 'achievements' || under === 'store';
   if (menuLike) drawClouds(); else drawWorld();
   ctx.setTransform(k, 0, 0, k, 0, 0);
   if (VIG) ctx.drawImage(VIG, 0, 0, W, H);
@@ -306,6 +307,7 @@ function render() {
   if (under === 'menu') drawMenu();
   else if (under === 'hangar') drawHangar();
   else if (under === 'achievements') drawAchievements();
+  else if (under === 'store') drawStore();
   else {
     drawHUD();
     if (under === 'over') drawOver();
@@ -318,5 +320,6 @@ function render() {
     }
   }
   if (G.state === 'settings') drawSettings();
+  drawFakeAd();
   drawToasts();
 }

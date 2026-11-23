@@ -8,7 +8,7 @@ function resize() {
   const iw = innerWidth, ih = innerHeight;
   H = Math.round(Math.min(1170, Math.max(800, W * ih / iw)));
   VS = Math.min(iw / W, ih / H);
-  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  DPR = Math.min(window.devicePixelRatio || 1, typeof Q === 'function' ? Q().dpr : 2);
   cv.style.width = (W * VS) + 'px'; cv.style.height = (H * VS) + 'px';
   cv.width = Math.round(W * VS * DPR); cv.height = Math.round(H * VS * DPR);
   if (typeof makeVig === 'function') makeVig();
