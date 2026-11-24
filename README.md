@@ -116,7 +116,7 @@ los impactos críticos muestran el multiplicador (×2, ×3…) y los disparos bl
 | 5 | **Goliat** | Torso blindado y puños que bloquean disparos | Al cargar un puñetazo abre el pecho: ×3 | Puñetazo sísmico (onda de balas) |
 | 6 | **Arácnido** | Muy rápido, te persigue y salta | Abdomen trasero ×2 (atácalo por los lados) | Telaraña que te deja lento |
 | 7 | **Tormenta** | Escudo eléctrico: invulnerable a ratos | Tras los rayos se sobrecarga: ×2 | Rayos en columna (aviso amarillo) |
-| 8 | **Hidra** | 3 cabezas que se regeneran a los 14 s | Cada cabeza cortada: las demás +50 % de daño | Triple aliento: fuego, hielo y veneno |
+| 8 | **Hidra** | 3 cabezas que se regeneran a los 14 s, cada vez con menos vida | Cada cabeza cortada: las demás +50 % de daño | Triple aliento: fuego, hielo y veneno |
 | 9 | **Fantasma** | Invisible, se teletransporta y crea señuelos | Visible recibe ×1,5; señuelos frágiles | Guadaña fantasma |
 | 10 | **Núcleo Omega** | 4 escudos orbitales que bloquean · 3 fases | Fase final sin escudos: ×1,5 | Colapso: atrae tu nave al núcleo |
 

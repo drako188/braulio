@@ -247,8 +247,8 @@ const BOSS_DEFS = [
     } },
 
   /* 5 ─ GOLIAT */
-  { kind: 'goliath', name: 'GOLIAT', hp: 950, size: [300, 200], ground: true,
-    virt: 'Torso blindado (55 % de daño) y puños que bloquean disparos', weak: 'Al cargar un puñetazo abre el pecho: núcleo ×3', spec: 'Puñetazo sísmico',
+  { kind: 'goliath', name: 'GOLIAT', hp: 720, size: [300, 200], ground: true,
+    virt: 'Torso blindado (65 % de daño) y puños que bloquean disparos', weak: 'Al cargar un puñetazo abre el pecho: núcleo ×3', spec: 'Puñetazo sísmico',
     init(b) {
       b.y = -230; b.spr = 'goliath'; b.pt = 2.5; b.side = 1; b.chest = 0;
       b.arms = [-1, 1].map(s => ({ s, x: W / 2 + s * 150, y: 40, st: 'rest', t: 0, tx: 0, ty: 0, sc: 1 }));
@@ -286,7 +286,7 @@ const BOSS_DEFS = [
     boxes(b) {
       const out = [];
       if (b.chest > 0) out.push([b.x, b.y + 20, 40, 3]);
-      out.push([b.x, b.y, 80, 0.55]);
+      out.push([b.x, b.y, 80, 0.65]);
       for (const a of b.arms) out.push([a.x, a.y + 20, 44, 0]);
       return out;
     },
@@ -414,7 +414,7 @@ const BOSS_DEFS = [
 
   /* 8 ─ HIDRA */
   { kind: 'hydra', name: 'HIDRA', hp: 1050, size: [300, 260],
-    virt: 'Tres cabezas que se regeneran a los 14 s si no las matas todas', weak: 'Cada cabeza cortada hace que las demás reciban +50 % de daño', spec: 'Triple aliento: fuego, hielo y veneno',
+    virt: 'Tres cabezas que se regeneran a los 14 s si no las matas todas (cada vez con menos vida)', weak: 'Cada cabeza cortada hace que las demás reciban +50 % de daño', spec: 'Triple aliento: fuego, hielo y veneno',
     init(b) {
       b.y = -200; b.spr = 'hydra'; b.st = 10; b.breath = 0;
       const hh = Math.round(b.maxhp / 3);
@@ -424,7 +424,7 @@ const BOSS_DEFS = [
       const base = [[-115, 100], [0, 128], [115, 100]];
       for (const h of b.heads) {
         h.x = b.x + base[h.i][0] + Math.sin(b.t * 1.5 + h.i) * 16; h.y = b.y + base[h.i][1] + Math.cos(b.t * 1.2 + h.i * 2) * 12; h.hit = Math.max(0, h.hit - dt);
-        if (h.dead && b.heads.some(o => !o.dead)) { h.regen -= dt; if (h.regen <= 0) { h.dead = false; h.hp = Math.round(h.max * 0.4); burst(h.x, h.y, 20, 'green', 200, 0.6, 1); FT.push({ x: h.x, y: h.y - 40, t: 0, s: '¡REGENERA!', col: '#6aff3a' }); } }
+        if (h.dead && b.heads.some(o => !o.dead)) { h.regen -= dt; if (h.regen <= 0) { h.dead = false; h.hp = Math.max(1, Math.round(h.max * 0.4 * Math.pow(0.6, h.regens || 0))); h.regens = (h.regens || 0) + 1; burst(h.x, h.y, 20, 'green', 200, 0.6, 1); FT.push({ x: h.x, y: h.y - 40, t: 0, s: '¡REGENERA!', col: '#6aff3a' }); } }
       }
       b.hp = b.heads.reduce((s, h) => s + (h.dead ? 0 : Math.max(0, h.hp)), 0);
       if (b.enter) { enterTo(b, 150, 80, dt); return; }
@@ -543,7 +543,7 @@ const BOSS_DEFS = [
     } },
 
   /* 10 ─ NÚCLEO OMEGA */
-  { kind: 'omega', name: 'NÚCLEO OMEGA', hp: 950, size: [260, 260],
+  { kind: 'omega', name: 'NÚCLEO OMEGA', hp: 800, size: [260, 260],
     virt: '4 escudos orbitales que bloquean disparos · 3 fases', weak: 'En la fase final pierde los escudos: núcleo ×1,5', spec: 'Colapso: atrae tu nave hacia el núcleo',
     init(b) { b.y = -200; b.spr = 'omega'; b.pa = 0; b.phase = 1; },
     update(b, dt) {
@@ -604,9 +604,12 @@ const BOSS_DEFS = [
 const bossDef = (b = boss) => BOSS_DEFS[b.idx];
 function nextBoss() { return BOSS_DEFS[G.mode === 'endless' ? ENDLESS.next : (level - 1) % BOSS_DEFS.length]; }
 function bossCenter(b = boss) { const Df = bossDef(b); return Df.center ? Df.center(b) : [b.x, b.y]; }
+function bossScale(L) { return 1 + 0.3 * Math.min(L - 1, 9) + 0.15 * Math.max(0, L - 10); }
 function spawnBoss() {
-  const idx = G.mode === 'endless' ? ENDLESS.next : (level - 1) % BOSS_DEFS.length, Df = BOSS_DEFS[idx], cycle = Math.floor((level - 1) / BOSS_DEFS.length);
-  const hp = Math.round(Df.hp * (1 + 0.3 * (level - 1)) * (1 + cycle * 0.5) * D.hp);
+  const idx = G.mode === 'endless' ? ENDLESS.next : (level - 1) % BOSS_DEFS.length, Df = BOSS_DEFS[idx];
+  // Vida: +30 % por sector en el primer ciclo y solo +15 % por sector después (antes se multiplicaba también por ciclo
+  // y los jefes del Ciclo 2+ y del Modo Infinito tardaban varios minutos en caer).
+  const hp = Math.round(Df.hp * bossScale(level) * D.hp);
   boss = { idx, kind: Df.kind, name: Df.name, x: W / 2, y: -170, hp, maxhp: hp, t: 0, hit: 0, enter: true, a1: 1, a2: 0.5, a3: 4, spin: 0, dying: 0,
     ta: [Math.PI / 2, Math.PI / 2, Math.PI / 2, Math.PI / 2], rage: false };
   Df.init(boss);

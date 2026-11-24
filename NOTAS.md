@@ -36,6 +36,13 @@ Shooter vertical futurista para Android, original. El juego está hecho en HTML5
 11. **Fase B · Ingresos**: anuncios AdMob (con recompensa y entre partidas), compras de Google Play, tienda con Pack Piloto, Sin anuncios y bolsas de monedas, y guía `PUBLICAR.md`.
 12. **Fase C**: Modo Infinito y pantalla de resultados con calificación S/A/B/C.
 13. **Corrección**: la Hidra se quedaba trabada al cortarle las cabezas a disparos. Arreglado, con una comprobación general para que ningún jefe vuelva a quedarse atascado.
+14. **Verificación y equilibrio** (24 nov):
+    - Primera compilación con anuncios y compras: correcta.
+    - Simulación automática de los 10 jefes en el Ciclo 1, 2 y 3 con varias naves.
+    - La vida de los jefes ya no se multiplica por ciclo: +30 % por sector hasta el 10 y +15 % por sector después. Goliat en el Ciclo 2 pasó de ~3,5 min a ~1,5 min y en el Ciclo 3 de ~7,5 min a ~2 min.
+    - Goliat: vida 950 → 720 y el torso recibe el 65 % del daño (antes 55 %).
+    - Núcleo Omega: vida 950 → 800.
+    - Hidra: cada vez que una cabeza se regenera vuelve con menos vida. Con el Vórtice en el Ciclo 2 la pelea no terminaba nunca.
 
 ## Decisiones tomadas
 - **Tecnología**: HTML5 Canvas sin dependencias dentro de una app Android nativa. Se puede probar en cualquier navegador.
@@ -56,9 +63,9 @@ Shooter vertical futurista para Android, original. El juego está hecho en HTML5
 
 ## Pendiente
 ### Por verificar
-- [ ] **El código nativo de anuncios y compras (`Monetization.java`) no se ha compilado nunca.** Al compilar el primer APK hay que revisar que no falle. La última compilación que funcionó es anterior a ese código.
+- [x] Compilar el código nativo de anuncios y compras (`Monetization.java`). Compiló bien el 24 de noviembre.
 - [ ] Probar en tu teléfono el APK de prueba: rendimiento, controles, sonido y anuncios de prueba.
-- [ ] Revisar el equilibrio en partidas largas: Núcleo Omega fase 3, Goliat, Modo Infinito y Ciclo 2.
+- [x] Revisar el equilibrio en partidas largas: Núcleo Omega, Goliat, Modo Infinito y Ciclo 2. Ajustado con simulaciones; falta tu prueba real.
 
 ### Para publicar y cobrar (ver `PUBLICAR.md`)
 - [ ] Crear la cuenta de Google Play Console (25 US$) y hacer la prueba cerrada con 12 testers durante 14 días.
@@ -66,7 +73,7 @@ Shooter vertical futurista para Android, original. El juego está hecho en HTML5
 - [ ] Crear la cuenta de AdMob y poner tus 3 IDs en `android/app/src/main/res/values/ads.xml`. Ahora tiene los IDs de prueba de Google, que no generan dinero.
 - [ ] Crear en Play Console los 5 productos con sus IDs: `starter_pack`, `remove_ads`, `coins_small`, `coins_medium`, `coins_large`.
 - [ ] Configurar el perfil de pagos en Play Console.
-- [ ] Completar `store/politica-privacidad.html` (fecha, nombre y correo) y publicarla en una web.
+- [ ] Completar `store/politica-privacidad.html` (falta nombre y correo; la fecha ya está) y publicarla en una web.
 - [ ] Subir la ficha de tienda con `store/ficha-tienda.md`, el ícono, el gráfico destacado y las capturas.
 - [ ] Compilar la versión firmada: Actions → Build APK → Run workflow, marcando "Versión firmada".
 
